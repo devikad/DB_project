@@ -1,0 +1,22 @@
+from django.contrib import admin
+from models import AppUser, BelongsTo, CanSpeak, Comments, Company, CompanyLocatedIn, HasInterest, HasRelation, Interest, IsTopic, Language, Location, MakeComment, RelationType, StudiesIn, University, UniversityLocatedIn, UserGroup, WorksIn 
+# Register your models here.
+admin.site.register(AppUser)
+admin.site.register(BelongsTo)
+admin.site.register(CanSpeak)
+admin.site.register(Comments)
+admin.site.register(Company)
+admin.site.register(CompanyLocatedIn)
+admin.site.register(HasInterest)
+admin.site.register(HasRelation)
+admin.site.register(Interest)
+admin.site.register(IsTopic)
+admin.site.register(Language)
+admin.site.register(Location)
+admin.site.register(MakeComment)
+admin.site.register(RelationType)
+admin.site.register(StudiesIn)
+admin.site.register(University)
+admin.site.register(UniversityLocatedIn)
+admin.site.register(UserGroup)
+admin.site.register(WorksIn)
