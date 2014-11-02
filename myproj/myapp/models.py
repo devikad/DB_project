@@ -10,18 +10,20 @@
 from __future__ import unicode_literals
 
 from django.db import models
+from django.contrib.auth.models import User
 
 
 class AppUser(models.Model):
-    user_id = models.BigIntegerField(primary_key=True)
+    user = models.OneToOneField(User)
+    appuser_id = models.BigIntegerField(primary_key=True)
     first_name = models.CharField(max_length=40, blank=True)
     last_name = models.CharField(max_length=40, blank=True)
     birthday = models.DateField(blank=True, null=True)
     gender = models.CharField(max_length=1, blank=True)
-    email = models.CharField(max_length=40)
+    email = models.CharField(max_length=40)  # not null
     phone_number = models.BigIntegerField(blank=True, null=True)
     lives_in_location = models.BigIntegerField()
-    password = models.CharField(max_length=20)
+    password = models.CharField(max_length=20)  # not null
     about_me = models.CharField(max_length=400, blank=True)
 
     def __str__(self):
@@ -30,6 +32,8 @@ class AppUser(models.Model):
     class Meta:
         managed = False
         db_table = 'app_user'
+
+User.profile = property(lambda u: AppUser.objects.get_or_create(user=u)[0])
 
 
 class BelongsTo(models.Model):
