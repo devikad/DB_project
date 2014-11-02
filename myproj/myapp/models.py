@@ -1,6 +1,6 @@
 # This is an auto-generated Django model module.
 # You'll have to do the following manually to clean this up:
-#   * Rearrange models' order
+# * Rearrange models' order
 #   * Make sure each model has one field with primary_key=True
 #   * Remove `managed = False` lines if you wish to allow Django to create, modify, and delete the table
 # Feel free to rename the models, but don't rename db_table values or field names.
@@ -10,26 +10,30 @@
 from __future__ import unicode_literals
 
 from django.db import models
+from django.contrib.auth.models import User
 
 
 class AppUser(models.Model):
-    user_id = models.BigIntegerField(primary_key=True)
+    user = models.OneToOneField(User)
+    appuser_id = models.BigIntegerField(primary_key=True)
     first_name = models.CharField(max_length=40, blank=True)
     last_name = models.CharField(max_length=40, blank=True)
     birthday = models.DateField(blank=True, null=True)
     gender = models.CharField(max_length=1, blank=True)
-    email = models.CharField(max_length=40)
+    email = models.CharField(max_length=40)  # not null
     phone_number = models.BigIntegerField(blank=True, null=True)
     lives_in_location = models.BigIntegerField()
-    password = models.CharField(max_length=20)
+    password = models.CharField(max_length=20)  # not null
     about_me = models.CharField(max_length=400, blank=True)
-    
+
     def __str__(self):
-    	return '%s %s' %(self.first_name, self.last_name)
+        return '%s %s' % (self.first_name, self.last_name)
 
     class Meta:
         managed = False
         db_table = 'app_user'
+
+User.profile = property(lambda u: AppUser.objects.get_or_create(user=u)[0])
 
 
 class BelongsTo(models.Model):
@@ -72,7 +76,7 @@ class Company(models.Model):
     established_year = models.BigIntegerField(blank=True, null=True)
 
     def __str__(self):
-        return '%s' %(self.name)
+        return '%s' % (self.name)
 
     class Meta:
         managed = False
@@ -116,7 +120,7 @@ class Interest(models.Model):
     name = models.CharField(max_length=40)
 
     def __str__(self):
-        return '%s' %(self.name)
+        return '%s' % (self.name)
 
     class Meta:
         managed = False
@@ -136,8 +140,9 @@ class IsTopic(models.Model):
 class Language(models.Model):
     language_id = models.BigIntegerField(primary_key=True)
     name = models.CharField(max_length=40)
+
     def __str__(self):
-        return '%s' %(self.name)
+        return '%s' % (self.name)
 
     class Meta:
         managed = False
@@ -149,7 +154,7 @@ class Location(models.Model):
     name = models.CharField(max_length=40)
 
     def __str__(self):
-        return '%s' %(self.name)
+        return '%s' % (self.name)
 
     class Meta:
         managed = False
@@ -171,9 +176,9 @@ class MakeComment(models.Model):
 class RelationType(models.Model):
     relationtype_id = models.BigIntegerField(primary_key=True)
     name = models.CharField(max_length=40)
-   
+
     def __str__(self):
-        return '%s' %(self.name)
+        return '%s' % (self.name)
 
     class Meta:
         managed = False
@@ -203,7 +208,7 @@ class University(models.Model):
     about = models.CharField(max_length=2048, blank=True)
 
     def __str__(self):
-        return '%s' %(self.name)
+        return '%s' % (self.name)
 
     class Meta:
         managed = False
@@ -227,7 +232,7 @@ class UserGroup(models.Model):
     admin = models.ForeignKey(AppUser, db_column='admin')
 
     def __str__(self):
-        return '%s' %(self.name)
+        return '%s' % (self.name)
 
     class Meta:
         managed = False
