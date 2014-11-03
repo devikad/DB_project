@@ -14,8 +14,8 @@ from django.contrib.auth.models import User
 
 
 class AppUser(models.Model):
-    user = models.OneToOneField(User)
-    appuser_id = models.BigIntegerField(primary_key=True)
+    #user = models.OneToOneField(User)
+    user_id = models.BigIntegerField(primary_key=True)
     first_name = models.CharField(max_length=40, blank=True)
     last_name = models.CharField(max_length=40, blank=True)
     birthday = models.DateField(blank=True, null=True)
@@ -33,7 +33,7 @@ class AppUser(models.Model):
         managed = False
         db_table = 'app_user'
 
-User.profile = property(lambda u: AppUser.objects.get_or_create(user=u)[0])
+#User.profile = property(lambda u: AppUser.objects.get_or_create(user=u)[0])
 
 
 class BelongsTo(models.Model):
