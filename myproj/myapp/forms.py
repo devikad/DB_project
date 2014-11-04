@@ -2,6 +2,7 @@ from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.contrib.auth.models import User
 from django import forms
 from django.utils.html import strip_tags
+from models import Comments
 
 
 class UserCreateForm(UserCreationForm):
@@ -36,3 +37,18 @@ class AuthenticateForm(AuthenticationForm):
             if f != '__all__':
                 self.fields[f].widget.attrs.update({'class': 'error', 'value': strip_tags(error)})
         return form
+
+
+class CommentsForm(forms.ModelForm):
+    text = forms.CharField(required=True, widget=forms.widgets.Textarea(attrs={'class': 'commentsText'}))
+
+    def is_valid(self):
+        form = super(CommentsForm, self).is_valid()
+        for f in self.errors.iterkeys():
+            if f != '__all__':
+                self.fields[f].widget.attrs.update({'class': 'error CommentsText'})
+        return form
+
+    class Meta:
+        model = Comments
+        exclude = ['comments_id']

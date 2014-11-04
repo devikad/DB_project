@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>what do you want to share?</title>
+</head>
+<body>
+    <h1>Make a comment</h1>
+    <p>
+        <form action="/submit" method="post">
+        {% for field in comments_form %}{% csrf_token %}
+        {{ field }}
+        {% endfor %}
+        <input type="hidden" value="{{ next_url }}" name="next_url">
+        <input type="submit" value="Submit!">
+        </form>
+    </p>
+</body>
+</html>

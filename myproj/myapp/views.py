@@ -1,6 +1,8 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, authenticate, logout
-from forms import AuthenticateForm, UserCreateForm
+from forms import AuthenticateForm, UserCreateForm, CommentsForm
+from models import UserGroup
+from django.db import connection
 
 
 def index(request, auth_form=None, user_form=None):
@@ -52,3 +54,36 @@ def signup(request):
         else:
             return index(request, user_form=user_form)
     return redirect('/')
+
+
+def submit_comments(request):
+    print "submitting comments..."
+    if request.method == "POST":
+        comments_form = CommentsForm(data=request.POST)
+        next_url = request.POST.get("next_url", "/")
+        if comments_form.is_valid():
+            comments_form.save()
+            # user_id = request.user.user_id
+            # group_id =
+            # cursor = connection.cursor()
+            # cursor.execute('''INSERT INTO make_comment () values()''')
+            print "comments_form is valid!"
+            return redirect(next_url)
+        else:
+            print "comments_form is not valid!"
+            return redirect('/')
+    print "request type is not POST!"
+    return redirect('/')
+
+
+def usergroup_view(request, usergroup_id, comments_form=None):
+    usergroup = UserGroup.objects.get(usergroup_id=usergroup_id)
+    comments_form = comments_form or CommentsForm()
+    comments = [i.comment for i in usergroup.makecomment_set.all()]
+    return render(request,
+                  "base_groups.html",
+                  {
+                      'comments_form': comments_form,
+                      'usergroup': usergroup,
+                      'comments': comments,
+                  })
