@@ -21,6 +21,21 @@ class UserCreateForm(UserCreationForm):
             if f != '__all__':
                 self.fields[f].widget.attrs.update({'class': 'error', 'value': strip_tags(error)})
         return form
+ 
+     def save(self, commit=True):
+	#user = super(UserCreateForm, self).save(commit=True)
+	maxid = AppUser.objects.all().aggregate(Max('user_id'))['user_id__max']
+	if maxid==None:
+	    maxid=1
+	newuser = super(UserCreateForm, self).save(commit=False)
+        #newuser = AppUser(username=self.cleaned_data['username'], email=self.cleaned_data['username'], user_id=(maxid+1) , lives_in_location=1)
+        newuser.email=self.cleaned_data['username']
+	newuser.user_id = maxid+1
+	newuser.lives_in_location = 1
+	newuser.set_password(self.cleaned_data['password1'])
+	if commit:
+	    newuser.save()
+        return newuser
 
     class Meta:
         fields = ['username', 'password1', 'password2']
