@@ -2,9 +2,39 @@
 
 {% block content%}
     <div>
-        <h1>Profile:</h1>
-        <p>
-            {{ first_name }}
-        </p>
+        <h1>{{ usergroup.name }}</h1>
+
+{#        <a href="/submit">Post</a>#}
+        <a href="">Recent</a>
+        <a href="">Popular</a>
+
+        <div class="panel right">
+            <h1>Post</h1>
+            <p>
+                <form action="/submit" method="post">
+                {% for field in comments_form %}{% csrf_token %}
+                {{ field }}
+                {% endfor %}
+                <input type="hidden" value="{{ next_url }}" name="next_url">
+                <input type="submit" value=Post!">
+                </form>
+            </p>
+        </div>
+
+        <h2>Comments</h2>
+        {% for comment in comments %}
+        <div>
+            <span class="name">{{ comment.makecomment_set.get.user.email }}</span>
+            <span class="time">{{ comment.makecomment_set.get.posting_time }}</span>
+            <p>{{ comment.text }}</p>
+        </div>
+        {% endfor %}
+
+        <h2>Group Users</h2>
+        {% for belongsto_relation in usergroup.belongsto_set.all %}
+            <div>
+                <span>{{ belongsto_relation.user.email }}</span>
+            </div>
+        {% endfor %}
     </div>
 {% endblock %}

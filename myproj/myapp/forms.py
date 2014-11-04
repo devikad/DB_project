@@ -40,10 +40,10 @@ class AuthenticateForm(AuthenticationForm):
 
 
 class CommentsForm(forms.ModelForm):
-    content = forms.CharField(required=True, widget=forms.widgets.Textarea(attrs={'class': 'commentsText'}))
+    text = forms.CharField(required=True, widget=forms.widgets.Textarea(attrs={'class': 'commentsText'}))
 
     def is_valid(self):
-        form = super(CommentsForm, self).is_valiid()
+        form = super(CommentsForm, self).is_valid()
         for f in self.errors.iterkeys():
             if f != '__all__':
                 self.fields[f].widget.attrs.update({'class': 'error CommentsText'})
@@ -51,4 +51,4 @@ class CommentsForm(forms.ModelForm):
 
     class Meta:
         model = Comments
-        exclude = ('comments_id',)
+        exclude = ['comments_id']

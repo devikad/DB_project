@@ -10,7 +10,6 @@
 from __future__ import unicode_literals
 
 from django.db import models
-from django.contrib.auth.models import User
 
 
 class AppUser(models.Model):
@@ -31,7 +30,7 @@ class AppUser(models.Model):
 
     class Meta:
         managed = False
-        db_table = 'app_user'
+        db_table = 'app_user1'
 
 #User.profile = property(lambda u: AppUser.objects.get_or_create(user=u)[0])
 
