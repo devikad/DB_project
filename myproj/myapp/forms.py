@@ -1,8 +1,8 @@
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
-from django.contrib.auth.models import User
+from models import AppUser
 from django import forms
 from django.utils.html import strip_tags
-
+from django.db.models import Max
 
 class UserCreateForm(UserCreationForm):
     # first_name = forms.CharField(required=True, widget=forms.widgets.TextInput(attrs={'placeholder': 'First Name'}))
@@ -20,10 +20,25 @@ class UserCreateForm(UserCreationForm):
             if f != '__all__':
                 self.fields[f].widget.attrs.update({'class': 'error', 'value': strip_tags(error)})
         return form
+    
+    def save(self, commit=True):
+	#user = super(UserCreateForm, self).save(commit=True)
+	maxid = AppUser.objects.all().aggregate(Max('user_id'))['user_id__max']
+	if maxid==None:
+	    maxid=1
+	newuser = super(UserCreateForm, self).save(commit=False)
+        #newuser = AppUser(username=self.cleaned_data['username'], email=self.cleaned_data['username'], user_id=(maxid+1) , lives_in_location=1)
+        newuser.email=self.cleaned_data['username']
+	newuser.user_id = maxid+1
+	newuser.lives_in_location = 1
+	newuser.set_password(self.cleaned_data['password1'])
+	if commit:
+	    newuser.save()
+        return newuser
 
     class Meta:
         fields = ['username', 'password1', 'password2']
-        model = User
+        model = AppUser
 
 
 class AuthenticateForm(AuthenticationForm):
@@ -36,3 +51,6 @@ class AuthenticateForm(AuthenticationForm):
             if f != '__all__':
                 self.fields[f].widget.attrs.update({'class': 'error', 'value': strip_tags(error)})
         return form
+
+    class Meta:
+        model = AppUser

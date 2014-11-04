@@ -91,3 +91,5 @@ STATIC_URL = '/static/'
 TEMPLATE_DIRS = (
     os.path.join(PROJECT_PATH, 'templates'),
 )
+
+AUTH_USER_MODEL = 'myapp.AppUser'
