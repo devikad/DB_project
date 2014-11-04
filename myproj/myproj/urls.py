@@ -10,3 +10,4 @@ urlpatterns = patterns('',
     url(r'^submit$', 'myapp.views.submit_comments'),  # submit new comment
     url(r'^groups/(?P<usergroup_id>\d+)/$', 'myapp.views.usergroup_view'),  # groups
 )
+

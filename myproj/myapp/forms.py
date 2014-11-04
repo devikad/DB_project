@@ -1,9 +1,9 @@
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
-from django.contrib.auth.models import User
+from models import AppUser
 from django import forms
 from django.utils.html import strip_tags
 from models import Comments
-
+from django.db.models import Max
 
 class UserCreateForm(UserCreationForm):
     # first_name = forms.CharField(required=True, widget=forms.widgets.TextInput(attrs={'placeholder': 'First Name'}))
@@ -21,9 +21,10 @@ class UserCreateForm(UserCreationForm):
             if f != '__all__':
                 self.fields[f].widget.attrs.update({'class': 'error', 'value': strip_tags(error)})
         return form
- 
-     def save(self, commit=True):
-	#user = super(UserCreateForm, self).save(commit=True)
+
+    
+    def save(self, commit=True):
+
 	maxid = AppUser.objects.all().aggregate(Max('user_id'))['user_id__max']
 	if maxid==None:
 	    maxid=1
@@ -39,7 +40,7 @@ class UserCreateForm(UserCreationForm):
 
     class Meta:
         fields = ['username', 'password1', 'password2']
-        model = User
+        model = AppUser
 
 
 class AuthenticateForm(AuthenticationForm):
@@ -67,3 +68,5 @@ class CommentsForm(forms.ModelForm):
     class Meta:
         model = Comments
         exclude = ['comments_id']
+
+  

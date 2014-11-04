@@ -10,27 +10,27 @@
 from __future__ import unicode_literals
 
 from django.db import models
+from django.contrib.auth.models import AbstractUser
 
 
-class AppUser(models.Model):
-    #user = models.OneToOneField(User)
+class AppUser(AbstractUser):
+   # user = models.OneToOneField(User)
     user_id = models.BigIntegerField(primary_key=True)
-    first_name = models.CharField(max_length=40, blank=True)
-    last_name = models.CharField(max_length=40, blank=True)
+   # first_name = models.CharField(max_length=40, blank=True)
+   # last_name = models.CharField(max_length=40, blank=True)
     birthday = models.DateField(blank=True, null=True)
     gender = models.CharField(max_length=1, blank=True)
-    email = models.CharField(max_length=40)  # not null
+   # email = models.CharField(max_length=40)  # not null
     phone_number = models.BigIntegerField(blank=True, null=True)
     lives_in_location = models.BigIntegerField()
-    password = models.CharField(max_length=20)  # not null
+#    password = models.CharField(max_length=20)  # not null
     about_me = models.CharField(max_length=400, blank=True)
 
     def __str__(self):
         return '%s %s' % (self.first_name, self.last_name)
 
     class Meta:
-        managed = False
-        db_table = 'app_user1'
+        db_table = 'app_user'
 
 #User.profile = property(lambda u: AppUser.objects.get_or_create(user=u)[0])
 

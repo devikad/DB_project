@@ -12,7 +12,7 @@ def index(request, auth_form=None, user_form=None):
         # first_name = user.profile.first_name
         return render(request,
                       'userProfile.html',
-                      {'first_name': user.id})
+                      {'first_name': user.username})
     else:
         # User is not logged in
         auth_form = auth_form or AuthenticateForm()
@@ -56,6 +56,7 @@ def signup(request):
     return redirect('/')
 
 
+
 def submit_comments(request):
     print "submitting comments..."
     if request.method == "POST":
@@ -87,3 +88,5 @@ def usergroup_view(request, usergroup_id, comments_form=None):
                       'usergroup': usergroup,
                       'comments': comments,
                   })
+
+
