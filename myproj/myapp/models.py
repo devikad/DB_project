@@ -14,16 +14,12 @@ from django.contrib.auth.models import AbstractUser
 
 
 class AppUser(AbstractUser):
-   # user = models.OneToOneField(User)
-    user_id = models.BigIntegerField(primary_key=True)
-   # first_name = models.CharField(max_length=40, blank=True)
-   # last_name = models.CharField(max_length=40, blank=True)
+    # first_name, last_name, email, username, password fields are inherited from AbstractUser
+    user_id = models.AutoField(primary_key=True)
     birthday = models.DateField(blank=True, null=True)
     gender = models.CharField(max_length=1, blank=True)
-   # email = models.CharField(max_length=40)  # not null
     phone_number = models.BigIntegerField(blank=True, null=True)
     lives_in_location = models.BigIntegerField()
-#    password = models.CharField(max_length=20)  # not null
     about_me = models.CharField(max_length=400, blank=True)
 
     def __str__(self):
@@ -32,11 +28,9 @@ class AppUser(AbstractUser):
     class Meta:
         db_table = 'app_user'
 
-#User.profile = property(lambda u: AppUser.objects.get_or_create(user=u)[0])
-
 
 class BelongsTo(models.Model):
-    belongsto_id = models.BigIntegerField(primary_key=True)
+    belongsto_id = models.AutoField(primary_key=True)
     user = models.ForeignKey(AppUser)
     group = models.ForeignKey('UserGroup')
 
@@ -46,7 +40,7 @@ class BelongsTo(models.Model):
 
 
 class CanSpeak(models.Model):
-    canspeak_id = models.BigIntegerField(primary_key=True)
+    canspeak_id = models.AutoField(primary_key=True)
     user = models.ForeignKey(AppUser)
     language = models.ForeignKey('Language')
     familiarity = models.IntegerField(blank=True, null=True)
@@ -57,7 +51,7 @@ class CanSpeak(models.Model):
 
 
 class Comments(models.Model):
-    comments_id = models.BigIntegerField(primary_key=True)
+    comments_id = models.AutoField(primary_key=True)
     text = models.CharField(max_length=1000)
 
     class Meta:
@@ -66,7 +60,7 @@ class Comments(models.Model):
 
 
 class Company(models.Model):
-    company_id = models.BigIntegerField(primary_key=True)
+    company_id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=40)
     field = models.CharField(max_length=40)
     about = models.CharField(max_length=2048, blank=True)
@@ -83,7 +77,7 @@ class Company(models.Model):
 
 
 class CompanyLocatedIn(models.Model):
-    companylocation_id = models.BigIntegerField(primary_key=True)
+    companylocation_id = models.AutoField(primary_key=True)
     company = models.ForeignKey(Company)
     location = models.ForeignKey('Location')
 
@@ -93,7 +87,7 @@ class CompanyLocatedIn(models.Model):
 
 
 class HasInterest(models.Model):
-    hasinterest_id = models.BigIntegerField(primary_key=True)
+    hasinterest_id = models.AutoField(primary_key=True)
     user = models.ForeignKey(AppUser)
     interest = models.ForeignKey('Interest')
     degree_of_interest = models.BigIntegerField(blank=True, null=True)
@@ -104,7 +98,7 @@ class HasInterest(models.Model):
 
 
 class HasRelation(models.Model):
-    hasrelation_id = models.BigIntegerField(primary_key=True)
+    hasrelation_id = models.AutoField(primary_key=True)
     relation_type = models.ForeignKey('RelationType')
     user_1 = models.ForeignKey(AppUser, related_name='user1')
     user_2 = models.ForeignKey(AppUser, related_name='user2')
@@ -115,7 +109,7 @@ class HasRelation(models.Model):
 
 
 class Interest(models.Model):
-    interest_id = models.BigIntegerField(primary_key=True)
+    interest_id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=40)
 
     def __str__(self):
@@ -127,7 +121,7 @@ class Interest(models.Model):
 
 
 class IsTopic(models.Model):
-    istopic_id = models.BigIntegerField(primary_key=True)
+    istopic_id = models.AutoField(primary_key=True)
     interest = models.ForeignKey(Interest)
     group = models.ForeignKey('UserGroup')
 
@@ -137,7 +131,7 @@ class IsTopic(models.Model):
 
 
 class Language(models.Model):
-    language_id = models.BigIntegerField(primary_key=True)
+    language_id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=40)
 
     def __str__(self):
@@ -149,7 +143,7 @@ class Language(models.Model):
 
 
 class Location(models.Model):
-    location_id = models.BigIntegerField(primary_key=True)
+    location_id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=40)
 
     def __str__(self):
@@ -161,7 +155,7 @@ class Location(models.Model):
 
 
 class MakeComment(models.Model):
-    makecomment_id = models.BigIntegerField(primary_key=True)
+    makecomment_id = models.AutoField(primary_key=True)
     posting_time = models.DateTimeField()
     group = models.ForeignKey('UserGroup')
     user = models.ForeignKey(AppUser)
@@ -173,7 +167,7 @@ class MakeComment(models.Model):
 
 
 class RelationType(models.Model):
-    relationtype_id = models.BigIntegerField(primary_key=True)
+    relationtype_id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=40)
 
     def __str__(self):
@@ -185,7 +179,7 @@ class RelationType(models.Model):
 
 
 class StudiesIn(models.Model):
-    studiesin_id = models.BigIntegerField(primary_key=True)
+    studiesin_id = models.AutoField(primary_key=True)
     user = models.ForeignKey(AppUser)
     university = models.ForeignKey('University')
     major = models.CharField(max_length=40, blank=True)
@@ -200,7 +194,7 @@ class StudiesIn(models.Model):
 
 
 class University(models.Model):
-    university_id = models.BigIntegerField(primary_key=True)
+    university_id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=400)
     web_address = models.CharField(max_length=1024, blank=True)
     established_year = models.BigIntegerField(blank=True, null=True)
@@ -215,7 +209,7 @@ class University(models.Model):
 
 
 class UniversityLocatedIn(models.Model):
-    universitylocation_id = models.BigIntegerField(primary_key=True)
+    universitylocation_id = models.AutoField(primary_key=True)
     university = models.ForeignKey(University)
     location = models.ForeignKey(Location)
 
@@ -225,7 +219,7 @@ class UniversityLocatedIn(models.Model):
 
 
 class UserGroup(models.Model):
-    usergroup_id = models.BigIntegerField(primary_key=True)
+    usergroup_id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=40)
     about = models.CharField(max_length=400)
     admin = models.ForeignKey(AppUser, db_column='admin')
@@ -239,7 +233,7 @@ class UserGroup(models.Model):
 
 
 class WorksIn(models.Model):
-    worksin_id = models.BigIntegerField(primary_key=True)
+    worksin_id = models.AutoField(primary_key=True)
     start_date = models.DateField()
     end_date = models.DateField(blank=True, null=True)
     position = models.CharField(max_length=40, blank=True)
