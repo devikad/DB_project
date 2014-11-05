@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, authenticate, logout
 from forms import AuthenticateForm, UserCreateForm, CommentsForm
-from models import UserGroup
+from models import UserGroup, AppUser, Location, AppUser1
 from django.db import connection
 
 
@@ -10,9 +10,10 @@ def index(request, auth_form=None, user_form=None):
     if request.user.is_authenticated():
         user = request.user
         # first_name = user.profile.first_name
+	location = Location.objects.get(location_id=user.lives_in_location)
         return render(request,
                       'userProfile.html',
-                      {'first_name': user.username})
+                      {'first_name': user.username, 'location':location.name})
     else:
         # User is not logged in
         auth_form = auth_form or AuthenticateForm()
@@ -89,4 +90,21 @@ def usergroup_view(request, usergroup_id, comments_form=None):
                       'comments': comments,
                   })
 
+def migrate(request):
+    #a = AppUser1.objects.all()
+    #a = [allusers]
+    #a.add(allusers)
+    #print "got user", allusers.user_id
+    a = ['aa','bb','cc','dd','ee','ff','gg','hh','ii','jj','kk','ll','mm','nn','oo','pp','qq','rr','ss']
+    for user in a:
+	#checkuser = AppUser.objects.filter(username=user.email)
+	#if checkuser.exists():
+	 #   continue
+	em=user+'@'+user+'.com'
+	#newuser = super(UserCreateForm, self).save(commit=False)
+        newuser = AppUser(username=em, email=em, lives_in_location=1, first_name=user, last_name=user)
+        newuser.set_password(user)
+        newuser.save()
+	print "Inserted user",user
+    return render(request, "migrate.html", {'msg':"success"})
 
