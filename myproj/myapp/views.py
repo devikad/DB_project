@@ -1,4 +1,5 @@
 import re
+import json
 from django.shortcuts import render, redirect, render_to_response
 from django.contrib.auth import login, authenticate, logout
 from django.template import RequestContext
@@ -88,7 +89,7 @@ def join_group(request, usergroup_id):
     print "joinning group..."
     BelongsTo(user=request.user,
               group=UserGroup.objects.get(usergroup_id=usergroup_id)).save()
-    return redirect('/groups/'+str(usergroup_id))
+    return redirect('/groups/' + str(usergroup_id))
 
 
 def usergroup_view(request, usergroup_id, comments_form=None):
@@ -110,7 +111,7 @@ def usergroup_view(request, usergroup_id, comments_form=None):
                       'comments': comments,
                       'mbrship': mbrship,
                       'loggedin': loggedin,
-                      'next_url': '/groups/'+str(usergroup_id),
+                      'next_url': '/groups/' + str(usergroup_id),
                   })
 
 '''
@@ -222,4 +223,24 @@ def company(request, comp_id):
     location = CompanyLocatedIn.objects.filter(company=comp_id)
     return render(request, "company.html",
                   { 'comp': comp, 'location': location, })
+
+def sn_graph_view(request, user_id):
+    json_dict, nodes, links = dict(), list(), list()
+    r1 = HasRelation.objects.filter(user_1_id=user_id)
+    r2 = HasRelation.objects.filter(user_2_id=user_id)
+    nodes.append({"name": AppUser.objects.get(user_id=user_id).username})  # source node
+    for r in r1:
+        nodes.append({"name": r.user_2.username})
+    for r in r2:
+        nodes.append({"name": r.user_1.username})
+    for target_index in xrange(1, len(nodes)):
+        links.append({"source":0, "target":target_index})
+    json_dict["nodes"] = nodes
+    json_dict["links"] = links
+    json_data = json.dumps(json_dict)
+    return render(request,
+                  'sn_graph.html',
+                    {
+                        "json_data": json_data
+                    })
 

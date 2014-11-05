@@ -1,5 +1,5 @@
 {% extends "base.html" %}
- 
+
 {% block login %}
     <form action="/login" method="post">{% csrf_token %}
         {% for field in auth_form %}
