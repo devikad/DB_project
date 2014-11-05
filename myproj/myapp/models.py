@@ -156,7 +156,7 @@ class Location(models.Model):
 
 class MakeComment(models.Model):
     makecomment_id = models.AutoField(primary_key=True)
-    posting_time = models.DateTimeField(auto_now=True, blank=True)
+    posting_time = models.DateTimeField()
     group = models.ForeignKey('UserGroup')
     user = models.ForeignKey(AppUser)
     comment = models.ForeignKey(Comments)

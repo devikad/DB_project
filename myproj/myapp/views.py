@@ -1,8 +1,8 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, authenticate, logout
 from forms import AuthenticateForm, UserCreateForm, CommentsForm
-from models import UserGroup
-from django.db import connection
+from models import *
+from datetime import datetime
 
 
 def index(request, auth_form=None, user_form=None):
@@ -56,19 +56,20 @@ def signup(request):
     return redirect('/')
 
 
-
 def submit_comments(request):
     print "submitting comments..."
     if request.method == "POST":
         comments_form = CommentsForm(data=request.POST)
         next_url = request.POST.get("next_url", "/")
+        group_id = next_url.split("/")[2]
         if comments_form.is_valid():
-            comments_form.save()
-            # user_id = request.user.user_id
-            # group_id =
-            # cursor = connection.cursor()
-            # cursor.execute('''INSERT INTO make_comment () values()''')
-            print "comments_form is valid!"
+            comment = comments_form.save()
+            MakeComment(posting_time=datetime.now(),
+                        group=UserGroup.objects.get(usergroup_id=group_id),
+                        user=request.user,
+                        comment=comment).save()
+            print "commentrs_form is valid!"
+            print "next_url:", next_url
             return redirect(next_url)
         else:
             print "comments_form is not valid!"
@@ -77,8 +78,22 @@ def submit_comments(request):
     return redirect('/')
 
 
+def join_group(request, usergroup_id):
+    print "joinning group..."
+    BelongsTo(user=request.user,
+              group=UserGroup.objects.get(usergroup_id=usergroup_id)).save()
+    return redirect('/groups/'+str(usergroup_id))
+
+
 def usergroup_view(request, usergroup_id, comments_form=None):
+    mbrship,loggedin = False, False
     usergroup = UserGroup.objects.get(usergroup_id=usergroup_id)
+    if request.user.is_authenticated():  # User is logged in
+        user = request.user
+        loggedin = True
+        group_mbrs = [b_relation.user for b_relation in usergroup.belongsto_set.all()]
+        if user in group_mbrs:  # current user belongs to the group
+            mbrship = True
     comments_form = comments_form or CommentsForm()
     comments = [i.comment for i in usergroup.makecomment_set.all()]
     return render(request,
@@ -87,6 +102,7 @@ def usergroup_view(request, usergroup_id, comments_form=None):
                       'comments_form': comments_form,
                       'usergroup': usergroup,
                       'comments': comments,
+                      'mbrship': mbrship,
+                      'loggedin': loggedin,
+                      'next_url': '/groups/'+str(usergroup_id),
                   })
-
-
