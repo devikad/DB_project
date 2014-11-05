@@ -11,5 +11,6 @@ urlpatterns = patterns('',
     url(r'^groups/(?P<usergroup_id>\d+)/$', 'myapp.views.usergroup_view'),  # groups
     url(r'^joingroup/(?P<usergroup_id>\d+)/$', 'myapp.views.join_group'),  # join the group
     url(r'^search_form/$', 'myapp.views.search_view'),
+    url(r'^sn_graph/(?P<user_id>\d+)/$', 'myapp.views.sn_graph_view'),
 )
 
