@@ -1,8 +1,11 @@
-from django.shortcuts import render, redirect
+import re
+from django.shortcuts import render, redirect, render_to_response
 from django.contrib.auth import login, authenticate, logout
+from django.template import RequestContext
 from forms import AuthenticateForm, UserCreateForm, CommentsForm
 from models import *
 from datetime import datetime
+from django.db.models import Q
 
 
 def index(request, auth_form=None, user_form=None):
@@ -86,7 +89,7 @@ def join_group(request, usergroup_id):
 
 
 def usergroup_view(request, usergroup_id, comments_form=None):
-    mbrship,loggedin = False, False
+    mbrship, loggedin = False, False
     usergroup = UserGroup.objects.get(usergroup_id=usergroup_id)
     if request.user.is_authenticated():  # User is logged in
         user = request.user
@@ -106,3 +109,46 @@ def usergroup_view(request, usergroup_id, comments_form=None):
                       'loggedin': loggedin,
                       'next_url': '/groups/'+str(usergroup_id),
                   })
+
+
+def normalize_query(query_string,
+                    findterms=re.compile(r'"([^"]+)"|(\S+)').findall,
+                    normspace=re.compile(r'\s{2,}').sub):
+    return [normspace(' ', (t[0] or t[1]).strip()) for t in findterms(query_string)]
+
+
+def get_query(query_string, search_fields):
+    query = None  # Query to search for every search term
+    terms = normalize_query(query_string)
+    for term in terms:
+        or_query = None  # Query to search for a given term in each field
+        for field_name in search_fields:
+            q = Q(**{"%s__icontains" % field_name: term})
+            if or_query is None:
+                or_query = q
+            else:
+                or_query = or_query | q
+        if query is None:
+            query = or_query
+        else:
+            query = query & or_query
+    return query
+
+
+def search_view(request):
+    query_string = ''
+    found_users, found_groups = None, None
+    if ('q' in request.GET) and request.GET['q'].strip():
+        query_string = request.GET['q']
+
+        user_query = get_query(query_string, ['first_name', 'last_name', 'username'])
+        group_query = get_query(query_string, ['name', 'about'])
+
+        found_users = AppUser.objects.filter(user_query)
+        found_groups = UserGroup.objects.filter(group_query)
+
+    return render_to_response('search_form.html',
+                          { 'query_string': query_string,
+                            'found_users': found_users,
+                            'found_groups': found_groups},
+                          context_instance=RequestContext(request))
