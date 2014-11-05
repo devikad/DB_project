@@ -9,6 +9,10 @@ urlpatterns = patterns('',
     url(r'^signup$', 'myapp.views.signup'),  # signup
     url(r'^submit$', 'myapp.views.submit_comments'),  # submit new comment
     url(r'^groups/(?P<usergroup_id>\d+)/$', 'myapp.views.usergroup_view'),  # groups
-    url(r'^migrate$', 'myapp.views.migrate'),
+    url(r'^joingroup/(?P<usergroup_id>\d+)/$', 'myapp.views.join_group'),  # join the group
+    url(r'^search_form/$', 'myapp.views.search_view'),
+    url(r'^profile/(?P<user_id>\d+)/$', 'myapp.views.profile'),  # profile
+    url(r'^university/(?P<uni_id>\d+)/$', 'myapp.views.university'),  # uni
+    url(r'^company/(?P<comp_id>\d+)/$', 'myapp.views.company'),  # comp
 )
 

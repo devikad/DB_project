@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content%}
+    <div>
+        <h1>{{ uni.name }}</h1>
+        {% for l in location %}
+            <h2>{{ l.location.name }}</h2>
+        {% endfor %}
+	<p> Web Address : <a href="{{uni.web_address}}">{{uni.web_address}}</a></p>
+	<p> Established In : {{uni.established_year}} </p>
+	<p> {{uni.about}} </p>
+ </div>
+{% endblock %}
+                
+

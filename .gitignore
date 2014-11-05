@@ -1,1 +1,4 @@
 *.pyc
+.idea/
+DB_project/.idea/
+.idea
