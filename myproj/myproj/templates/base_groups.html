@@ -46,9 +46,9 @@
         {% for belongsto_relation in usergroup.belongsto_set.all %}
             <div>
                 {% if belongsto_relation.user.user_id == usergroup.admin.user_id %}
-                    <h1>{{ belongsto_relation.user.username }}</h1>
+                    <a href="{# {% url 'myapp.views.index' belongsto_relation.user.user_id %} #}"><mark>{{ belongsto_relation.user.username }}</mark></a>
                 {% else %}
-                    <span>{{ belongsto_relation.user.username }}</span>
+                    <a href="{# {% url 'myapp.views.index' belongsto_relation.user.user_id %} #}">{{ belongsto_relation.user.username }}</a>
                 {% endif %}
             </div>
         {% endfor %}
