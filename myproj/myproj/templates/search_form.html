@@ -5,15 +5,36 @@
     <h1>results of user:</h1>
     {% for user in found_users %}
         <div>
-            <span>{{ user.username }}</span>
+            <a href={% url 'user_profile' user.user_id %}>
+                {{ user.first_name }} {{ user.last_name }}
+            </a>
         </div>
     {% endfor %}
 
     <h1>results of group:</h1>
     {% for group in found_groups %}
         <div>
-            <span>{{ group.name }}</span>
+            <a href={% url 'group' group.usergroup_id %}>
+                {{ group.name }}
+            </a>
         </div>
     {% endfor %}
 
+    <h1>results of company:</h1>
+    {% for company in found_companies %}
+        <div>
+            <a href={% url 'company' company.company_id %}>
+                {{ company.name }}
+            </a>
+        </div>
+    {% endfor %}
+
+    <h1>results of university:</h1>
+    {% for university in found_universities %}
+        <div>
+            <a href={% url 'university' university.university_id %}>
+                {{ university.name }}
+            </a>
+        </div>
+    {% endfor %}
 {% endblock %}

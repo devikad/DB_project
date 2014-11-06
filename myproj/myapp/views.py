@@ -160,20 +160,26 @@ def get_query(query_string, search_fields):
 
 def search_view(request):
     query_string = ''
-    found_users, found_groups = None, None
+    found_users, found_groups, found_companies, found_universities = None, None, None, None
     if ('q' in request.GET) and request.GET['q'].strip():
         query_string = request.GET['q']
 
-        user_query = get_query(query_string, ['first_name', 'last_name', 'username'])
-        group_query = get_query(query_string, ['name', 'about'])
+        user_query = get_query(query_string, ['first_name', 'last_name'])
+        group_query = get_query(query_string, ['name'])
+        company_query = get_query(query_string, ['name'])
+        university_query = get_query(query_string, ['name'])
 
         found_users = AppUser.objects.filter(user_query)
         found_groups = UserGroup.objects.filter(group_query)
+        found_companies = Company.objects.filter(company_query)
+        found_universities = University.objects.filter(university_query)
 
     return render_to_response('search_form.html',
                               {'query_string': query_string,
                                'found_users': found_users,
-                               'found_groups': found_groups},
+                               'found_groups': found_groups,
+                               'found_companies': found_companies,
+                               'found_universities': found_universities},
                               context_instance=RequestContext(request))
 
 
@@ -339,4 +345,3 @@ def sn_graph_view(request, user_id):
                   {
                       "json_data": json_data
                   })
-

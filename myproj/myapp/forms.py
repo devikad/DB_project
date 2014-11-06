@@ -2,7 +2,6 @@ from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django import forms
 from django.utils.html import strip_tags
 from models import *
-from django.db.models import Max
 
 
 class UserCreateForm(UserCreationForm):
