@@ -4,7 +4,7 @@ from django.shortcuts import render, redirect, render_to_response
 from django.contrib.auth import login, authenticate, logout
 from django.template import RequestContext
 from forms import AuthenticateForm, UserCreateForm, CommentsForm, EditProfileForm, CreateGroupForm
-from models import UserGroup, AppUser, Location, AppUser1, University, Company, UniversityLocatedIn, CompanyLocatedIn, HasRelation, BelongsTo, StudiesIn, WorksIn, Interest, HasInterest, RelationType
+from models import *
 from django.db import connection
 from models import *
 from datetime import datetime

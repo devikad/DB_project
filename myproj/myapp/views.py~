@@ -4,7 +4,7 @@ from django.shortcuts import render, redirect, render_to_response
 from django.contrib.auth import login, authenticate, logout
 from django.template import RequestContext
 from forms import AuthenticateForm, UserCreateForm, CommentsForm, EditProfileForm, CreateGroupForm
-from models import UserGroup, AppUser, Location, AppUser1, University, Company, UniversityLocatedIn, CompanyLocatedIn, HasRelation, BelongsTo, StudiesIn, WorksIn, Interest, HasInterest, RelationType
+from models import *
 from django.db import connection
 from models import *
 from datetime import datetime
@@ -132,7 +132,7 @@ def usergroup_view(request, usergroup_id, comments_form=None):
                       'next_url': '/groups/' + str(usergroup_id),
                   })
 
-<<<<<<< HEAD
+
 '''
 The following function is never to be used again!
 '''
@@ -153,8 +153,7 @@ def migrate(request):
         newuser.save()
 	print "Inserted user",user
     return render(request, "migrate.html", {'msg':"success"})
-=======
->>>>>>> 382a536e7a6359f192e76774bf784adaf8036c37
+
 
 def normalize_query(query_string,
                     findterms=re.compile(r'"([^"]+)"|(\S+)').findall,
@@ -204,7 +203,7 @@ def search_view(request):
                                'found_universities': found_universities},
                               context_instance=RequestContext(request))
 
-<<<<<<< HEAD
+
 def editprofile(request):
     #edit_form = edit_form or EditProfileForm()
     print "editprofile"
@@ -265,10 +264,7 @@ def profile(request, user_id):
 	    isfriend = True
 
     print myprofile, isfriend
-=======
 
-def profile(request, user_id):
->>>>>>> 382a536e7a6359f192e76774bf784adaf8036c37
     user = AppUser.objects.get(user_id=user_id)
 
     f1 = HasRelation.objects.filter(user_1_id=user_id)
@@ -280,8 +276,6 @@ def profile(request, user_id):
     for f in f2:
         friend = AppUser.objects.get(user_id=f.user_1_id)
         friends.append(friend)
-<<<<<<< HEAD
-
     
     intr = HasInterest.objects.filter(user_id=user_id)
     lang = CanSpeak.objects.filter(user_id=user_id)
@@ -291,14 +285,6 @@ def profile(request, user_id):
     except :
 	location = ''
 
-=======
-
-    intr = HasInterest.objects.filter(user_id=user_id)
-    try:
-        location = Location.objects.get(location_id=user.lives_in_location_id)
-    except:
-        location = ''
->>>>>>> 382a536e7a6359f192e76774bf784adaf8036c37
     comp = WorksIn.objects.filter(user_id=user_id)
 
     uni = StudiesIn.objects.filter(user_id=user_id)
@@ -329,7 +315,7 @@ def profile(request, user_id):
                       'uni': uni,
                       'location': location,
                       'groups': groups,
-<<<<<<< HEAD
+
 		      'greco' : greco,
 		      'freco' : freco,
 		      'intr' : intr,
@@ -337,11 +323,7 @@ def profile(request, user_id):
 		      'myprofile' : myprofile,
 		      'isfriend' : isfriend,
 		      'lang' : lang,
-=======
-                      'greco': greco,
-                      'freco': freco,
-                      'intr': intr,
->>>>>>> 382a536e7a6359f192e76774bf784adaf8036c37
+
                   })
 
 
