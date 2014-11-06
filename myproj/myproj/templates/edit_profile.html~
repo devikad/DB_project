@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block login %}
+<h1> Edit your profile : </h1>
+<p>* Enter all dates in the format YYYY-MM-DD</p>
+    <form action="/editprofile" method="post">{% csrf_token %}
+        {% for field in edit_form %}
+        {{field.label}} {{ field }} <br>
+        {% endfor %}
+	<p>Languages :</p>
+	<table>
+        {{ lformset }}
+    </table>
+	<p>Interests :</p>
+	<table>
+        {{ iformset }}
+    </table>
+<p>Education :</p>
+	<table>
+        {{ uformset }}
+    </table>
+<p>Experience :</p>
+	<table>
+        {{ wformset }}
+    </table>
+        <input type="submit" value="Submit Changes">
+    </form>
+<br>
+<div>
+<form action="/addlang" method="get">
+               <input type="text" name="lang" placeholder="Add new language">
+               <input type="submit" value="Add Language">
+           </form>
+</div>
+
+<br>
+<div>
+<form action="/addint" method="get">
+               <input type="text" name="int" placeholder="Add new interest">
+               <input type="submit" value="Add Interest">
+           </form>
+</div>
+{% endblock %}
+
+
+
+{% block content %}
+{% if edit_form.non_field_errors %}
+<div class="flash error">
+    {{ edit_form.non_field_errors }}
+</div>
+{% endif %}
+
+{% endblock %}
+
