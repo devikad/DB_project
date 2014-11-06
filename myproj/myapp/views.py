@@ -4,7 +4,6 @@ from django.shortcuts import render, redirect, render_to_response
 from django.contrib.auth import login, authenticate, logout
 from django.template import RequestContext
 from forms import *
-from models import *
 from django.db import connection
 from models import *
 from datetime import datetime
@@ -18,7 +17,7 @@ def index(request, form_valid=True, auth_form=None, user_form=None):
     # User is logged in
     if request.user.is_authenticated():
         user = request.user
-        return redirect('/profile/'+str(user.user_id))
+        return redirect('/profile/' + str(user.user_id))
     else:
         # User is not logged in
         auth_form = auth_form or AuthenticateForm()
@@ -142,28 +141,6 @@ def usergroup_view(request, usergroup_id, comments_form=None):
                   })
 
 
-'''
-The following function is never to be used again!
-'''
-def migrate(request):
-    a = AppUser1.objects.all()
-    #a = [allusers]
-    #a.add(allusers)
-    #print "got user", allusers.user_id
-    #a = ['aa','bb','cc','dd','ee','ff','gg','hh','ii','jj','kk','ll','mm','nn','oo','pp','qq','rr','ss']
-    for user in a:
-	checkuser = AppUser.objects.filter(username=user.email)
-	if checkuser.exists():
-	    continue
-	#em=user+'@'+user+'.com'
-	newuser = super(UserCreateForm, self).save(commit=False)
-        newuser = AppUser(username=em, email=em, lives_in_location_id=1, first_name=user, last_name=user)
-        newuser.set_password(user)
-        newuser.save()
-	print "Inserted user",user
-    return render(request, "migrate.html", {'msg':"success"})
-
-
 def normalize_query(query_string,
                     findterms=re.compile(r'"([^"]+)"|(\S+)').findall,
                     normspace=re.compile(r'\s{2,}').sub):
@@ -212,133 +189,141 @@ def search_view(request):
                                'found_universities': found_universities},
                               context_instance=RequestContext(request))
 
+
 def addlang(request):
     if ('lang' in request.GET) and request.GET['lang'].strip():
         newlang = request.GET['lang']
-	u = AppUser.objects.get(user_id=request.user.user_id)
-	l = Language(name=newlang)
-	l.save()
-	c = CanSpeak(user=u, language=l)
-	c.save()
-    return redirect('/profile/'+str(u.user_id))
+        u = AppUser.objects.get(user_id=request.user.user_id)
+        l = Language(name=newlang)
+        l.save()
+        c = CanSpeak(user=u, language=l)
+        c.save()
+    return redirect('/profile/' + str(u.user_id))
+
 
 def addint(request):
     if ('int' in request.GET) and request.GET['int'].strip():
         newint = request.GET['int']
-	u = AppUser.objects.get(user_id=request.user.user_id)
-	i = Interest(name=newint)
-	i.save()
-	h = HasInterest(user=u, interest=i)
-	h.save()
-    return redirect('/profile/'+str(u.user_id))
+        u = AppUser.objects.get(user_id=request.user.user_id)
+        i = Interest(name=newint)
+        i.save()
+        h = HasInterest(user=u, interest=i)
+        h.save()
+    return redirect('/profile/' + str(u.user_id))
+
 
 def addloc(request):
     if ('loc' in request.GET) and request.GET['loc'].strip():
         newloc = request.GET['loc']
-	u = AppUser.objects.get(user_id=request.user.user_id)
-	l = Location(name=newloc)
-	l.save()
-	u.lives_in_location_id=l.location_id
-	u.save()
-    return redirect('/profile/'+str(u.user_id))
+        u = AppUser.objects.get(user_id=request.user.user_id)
+        l = Location(name=newloc)
+        l.save()
+        u.lives_in_location_id = l.location_id
+        u.save()
+    return redirect('/profile/' + str(u.user_id))
+
 
 def editprofile(request):
-    #edit_form = edit_form or EditProfileForm()
+    # edit_form = edit_form or EditProfileForm()
     print "editprofile"
-    l = CanSpeak.objects.filter(user_id = request.user.user_id)
-    i = HasInterest.objects.filter(user_id = request.user.user_id)
-    u = StudiesIn.objects.filter(user_id = request.user.user_id)
-    w = WorksIn.objects.filter(user_id = request.user.user_id)
-    LFormSet = modelformset_factory(CanSpeak, form = LanguageForm, extra=1, can_delete=True)
-    IFormSet = modelformset_factory(HasInterest, form = InterestForm, extra=1, can_delete=True)
-    UFormSet = modelformset_factory(StudiesIn, form = UniForm, extra=1, can_delete=True)
-    WFormSet = modelformset_factory(WorksIn, form = WorkForm, extra=1, can_delete=True)
+    l = CanSpeak.objects.filter(user_id=request.user.user_id)
+    i = HasInterest.objects.filter(user_id=request.user.user_id)
+    u = StudiesIn.objects.filter(user_id=request.user.user_id)
+    w = WorksIn.objects.filter(user_id=request.user.user_id)
+    LFormSet = modelformset_factory(CanSpeak, form=LanguageForm, extra=1, can_delete=True)
+    IFormSet = modelformset_factory(HasInterest, form=InterestForm, extra=1, can_delete=True)
+    UFormSet = modelformset_factory(StudiesIn, form=UniForm, extra=1, can_delete=True)
+    WFormSet = modelformset_factory(WorksIn, form=WorkForm, extra=1, can_delete=True)
     lformset = LFormSet(queryset=l)
     iformset = IFormSet(queryset=i)
     uformset = UFormSet(queryset=u)
     wformset = WFormSet(queryset=w)
     if request.method == 'POST':
-	print "if"
+        print "if"
         u = AppUser.objects.get(user_id=request.user.user_id)
-	
+
         form = EditProfileForm(request.POST, instance=u)
-	
-	lformset = LFormSet(request.POST, queryset=l)
-	iformset = IFormSet(request.POST, queryset=i)
-	uformset = UFormSet(request.POST)
-	wformset = WFormSet(request.POST)
+
+        lformset = LFormSet(request.POST, queryset=l)
+        iformset = IFormSet(request.POST, queryset=i)
+        uformset = UFormSet(request.POST)
+        wformset = WFormSet(request.POST)
         print u.username, "in view"
-        if form.is_valid() :#and iformset.is_valid() and iformset.is_valid() and uformset.is_valid() and wformset.is_valid():
-	    print "valid"  
+        if form.is_valid():  #and iformset.is_valid() and iformset.is_valid() and uformset.is_valid() and wformset.is_valid():
+            print "valid"
             u = form.save()
-	    #lformset.save()
-	    #uformset.save()
-	    #wformset.save()
-            return redirect('/profile/'+str(u.user_id))
-	print "not valid"
+            #lformset.save()
+            #uformset.save()
+            #wformset.save()
+            return redirect('/profile/' + str(u.user_id))
+        print "not valid"
     else:
-	print "else"
+        print "else"
         u = AppUser.objects.get(user_id=request.user.user_id)
-        form = EditProfileForm(instance=u) 
-	           
-    return render_to_response('edit_profile.html', { 'edit_form': form, 'lformset':lformset, 'iformset':iformset, 'uformset':uformset, 'wformset':wformset,  }, context_instance=RequestContext(request))
+        form = EditProfileForm(instance=u)
+
+    return render_to_response('edit_profile.html',
+                              {'edit_form': form, 'lformset': lformset, 'iformset': iformset, 'uformset': uformset,
+                               'wformset': wformset, }, context_instance=RequestContext(request))
+
 
 def addfriend(request, user_id):
     print "in addfriend"
     if request.user.is_authenticated():
         thisuser = request.user
-	print thisuser.user_id, "friend"
-	print user_id, "friend"
+        print thisuser.user_id, "friend"
+        print user_id, "friend"
 
     relation = RelationType.objects.get(pk=1)
-    u1 = AppUser.objects.get(user_id = thisuser.user_id)
-    u2 = AppUser.objects.get(user_id = user_id)
-    f1 = HasRelation(relation_type=relation, user_1 = u1, user_2 = u2)
-    f1.save() 
-    return redirect('/profile/'+str(user_id))
+    u1 = AppUser.objects.get(user_id=thisuser.user_id)
+    u2 = AppUser.objects.get(user_id=user_id)
+    f1 = HasRelation(relation_type=relation, user_1=u1, user_2=u2)
+    f1.save()
+    return redirect('/profile/' + str(user_id))
+
 
 def removefriend(request, user_id):
     print "in removefriend"
     if request.user.is_authenticated():
         thisuser = request.user
-	print thisuser.user_id, "friend"
-	print user_id, "friend"
+        print thisuser.user_id, "friend"
+        print user_id, "friend"
 
-    
-    u1 = AppUser.objects.get(user_id = thisuser.user_id)
-    u2 = AppUser.objects.get(user_id = user_id)
-    
+    u1 = AppUser.objects.get(user_id=thisuser.user_id)
+    u2 = AppUser.objects.get(user_id=user_id)
+
     fr1 = HasRelation.objects.filter(user_1=u1, user_2=u2)
     fr2 = HasRelation.objects.filter(user_1=u2, user_2=u1)
     fr1.delete()
     fr2.delete()
 
-    return redirect('/profile/'+str(user_id))
+    return redirect('/profile/' + str(user_id))
+
 
 def profile(request, user_id):
-    
-    loggedin = False 
+
+    loggedin = False
     myprofile = False
     isfriend = False
     if request.user.is_authenticated():
         thisuser = request.user
-	loggedin = True
-	print thisuser.user_id
-	print user_id
-	if int(thisuser.user_id) == int(user_id):
-	    myprofile = True
-	    print myprofile
-	
-	# finding all friends of currently logged in user
+        loggedin = True
+        print thisuser.user_id
+        print user_id
+        if int(thisuser.user_id) == int(user_id):
+            myprofile = True
+            print myprofile
+
+        # finding all friends of currently logged in user
         f1 = HasRelation.objects.filter(user_1_id=thisuser.user_id)
         f2 = HasRelation.objects.filter(user_2_id=thisuser.user_id)
-	friends = []
-	for f in f1:
-	    friends.append(int(f.user_2_id))
-	for f in f2:
-	    friends.append(int(f.user_1_id))
-   	if int(user_id) in friends :
-	    isfriend = True
+        friends = []
+        for f in f1:
+            friends.append(int(f.user_2_id))
+        for f in f2:
+            friends.append(int(f.user_1_id))
+        if int(user_id) in friends :
+            isfriend = True
 
     print myprofile, isfriend
 
@@ -353,14 +338,14 @@ def profile(request, user_id):
     for f in f2:
         friend = AppUser.objects.get(user_id=f.user_1_id)
         friends.append(friend)
-    
+
     intr = HasInterest.objects.filter(user_id=user_id)
     lang = CanSpeak.objects.filter(user_id=user_id)
 
     try :
-	location = Location.objects.get(location_id=user.lives_in_location_id)
+        location = Location.objects.get(location_id=user.lives_in_location_id)
     except :
-	location = ''
+        location = ''
 
     comp = WorksIn.objects.filter(user_id=user_id)
 
@@ -378,10 +363,10 @@ def profile(request, user_id):
         greco.append(fetch_g)
 
     if len(greco)<1:
-	
-	gps = BelongsTo.objects.annotate(num_users=Count('user', distinct=True)).order_by('-num_users')[:1]
-	for g in gps:
-	    greco.append(g.group)
+
+        gps = BelongsTo.objects.annotate(num_users=Count('user', distinct=True)).order_by('-num_users')[:1]
+        for g in gps:
+            greco.append(g.group)
 
     frns = friend_reco(user_id)
     freco = []
@@ -390,10 +375,10 @@ def profile(request, user_id):
         freco.append(fetch_f)
 
     if len(freco)<1:
-	
-	gps = HasRelation.objects.annotate(num_friends=Count('user_2', distinct=True)).order_by('-num_friends')[:1]
-	for g in gps:
-	    freco.append(g.user_1)
+
+        gps = HasRelation.objects.annotate(num_friends=Count('user_2', distinct=True)).order_by('-num_friends')[:1]
+        for g in gps:
+            freco.append(g.user_1)
 
     return render(request,
                   "userProfile.html",
@@ -404,15 +389,13 @@ def profile(request, user_id):
                       'uni': uni,
                       'location': location,
                       'groups': groups,
-
-		      'greco' : greco,
-		      'freco' : freco,
-		      'intr' : intr,
-		      'loggedin' : loggedin,
-		      'myprofile' : myprofile,
-		      'isfriend' : isfriend,
-		      'lang' : lang,
-
+                      'greco' : greco,
+                      'freco' : freco,
+                      'intr' : intr,
+                      'loggedin' : loggedin,
+                      'myprofile' : myprofile,
+                      'isfriend' : isfriend,
+                      'lang' : lang,
                   })
 
 
