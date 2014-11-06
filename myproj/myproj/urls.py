@@ -16,6 +16,7 @@ urlpatterns = patterns('',
     url(r'^university/(?P<uni_id>\d+)/$', 'myapp.views.university', name='university'),  # uni
     url(r'^company/(?P<comp_id>\d+)/$', 'myapp.views.company', name='company'),  # comp
     url(r'^sn_graph/(?P<user_id>\d+)/$', 'myapp.views.sn_graph_view'),
-
+    url(r'^create_group_view$', 'myapp.views.create_group_view'),
+    url(r'^create_group_submit$', 'myapp.views.create_group_submit'),
 )
 

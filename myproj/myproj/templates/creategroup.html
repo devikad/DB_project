@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+    <div>
+        <h1>Create a new Group!</h1>
+        <p>
+            <form action="/create_group_submit" method="post">{% csrf_token %}
+                {% for field in group_form %}
+                {{ field }}
+                {% endfor %}
+                <input type="submit" value="Create Group">
+            </form>
+        </p>
+    </div>
+
+{% endblock %}

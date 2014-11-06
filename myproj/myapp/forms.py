@@ -1,8 +1,7 @@
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
-from models import AppUser
 from django import forms
 from django.utils.html import strip_tags
-from models import Comments
+from models import *
 from django.db.models import Max
 
 
@@ -24,13 +23,8 @@ class UserCreateForm(UserCreationForm):
         return form
 
     def save(self, commit=True):
-        maxid = AppUser.objects.all().aggregate(Max('user_id'))['user_id__max']
-        if maxid == None:
-            maxid = 1
         newuser = super(UserCreateForm, self).save(commit=False)
-        # newuser = AppUser(username=self.cleaned_data['username'], email=self.cleaned_data['username'], user_id=(maxid+1) , lives_in_location=1)
         newuser.email = self.cleaned_data['username']
-        newuser.user_id = maxid + 1
         newuser.set_password(self.cleaned_data['password1'])
         if commit:
             newuser.save()
@@ -66,3 +60,19 @@ class CommentsForm(forms.ModelForm):
     class Meta:
         model = Comments
         exclude = ['comments_id']
+
+
+class CreateGroupForm(forms.ModelForm):
+    name = forms.CharField(required=True, widget=forms.widgets.Textarea(attrs={'placeholder': 'group name'}))
+    about = forms.CharField(required=True, widget=forms.widgets.Textarea(attrs={'placeholder': 'this group is about...'}))
+
+    def is_valid(self):
+        form = super(CreateGroupForm, self).is_valid()
+        for f in self.errors.iterkeys():
+            if f != '__all__':
+                self.fields[f].widget.attrs.update({'class': 'error group creation'})
+        return form
+
+    class Meta:
+        model = UserGroup
+        exclude = ['usergroup_id', 'admin']

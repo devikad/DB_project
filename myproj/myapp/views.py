@@ -3,7 +3,7 @@ import json
 from django.shortcuts import render, redirect, render_to_response
 from django.contrib.auth import login, authenticate, logout
 from django.template import RequestContext
-from forms import AuthenticateForm, UserCreateForm, CommentsForm
+from forms import AuthenticateForm, UserCreateForm, CommentsForm, CreateGroupForm
 from django.db import connection
 from models import *
 from datetime import datetime
@@ -65,7 +65,6 @@ def signup(request):
 
 
 def submit_comments(request):
-    print "submitting comments..."
     if request.method == "POST":
         comments_form = CommentsForm(data=request.POST)
         next_url = request.POST.get("next_url", "/")
@@ -76,14 +75,33 @@ def submit_comments(request):
                         group=UserGroup.objects.get(usergroup_id=group_id),
                         user=request.user,
                         comment=comment).save()
-            print "commentrs_form is valid!"
-            print "next_url:", next_url
             return redirect(next_url)
         else:
-            print "comments_form is not valid!"
             return redirect('/')
-    print "request type is not POST!"
     return redirect('/')
+
+
+def create_group_view(request):
+    if request.user.is_authenticated():
+        group_form = CreateGroupForm()
+        return render(request, 'creategroup.html',
+                      {
+                          'group_form': group_form
+                      })
+    return redirect('/')
+
+
+def create_group_submit(request):
+    group_form = CreateGroupForm(data=request.POST)
+    if request.method == 'POST':
+        if group_form.is_valid():
+            newgroup = group_form.save(commit=False)
+            newgroup.admin = request.user
+            newgroup.save()
+            BelongsTo(user=request.user,
+                      group=newgroup).save()
+            return redirect('/groups/' + str(newgroup.usergroup_id))
+    return redirect('/create_group_view')
 
 
 def join_group(request, usergroup_id):
