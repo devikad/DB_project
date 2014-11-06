@@ -14,11 +14,7 @@ def index(request, form_valid=True, auth_form=None, user_form=None):
     # User is logged in
     if request.user.is_authenticated():
         user = request.user
-        # first_name = user.profile.first_name
-        location = Location.objects.get(location_id=user.lives_in_location_id)
-        return render(request,
-                      'userProfile.html',
-                      {'first_name': user.username, 'location': location.name})
+        return redirect('/profile/'+str(user.user_id))
     else:
         # User is not logged in
         auth_form = auth_form or AuthenticateForm()
@@ -54,13 +50,14 @@ def signup(request):
     if request.method == 'POST':
         if user_form.is_valid():
             username = user_form.clean_username()
-            password = user_form.clean_password2()
-            user_form.save()
-            user = authenticate(username=username, password=password)
-            login(request, user)
-            return redirect('/')
-        else:
-            return index(request, form_valid=False, user_form=user_form)
+            password1 = user_form.cleaned_data.get('password1')
+            password2 = user_form.cleaned_data.get('password2')
+            if password1 == password2:
+                user_form.save()
+                user = authenticate(username=username, password=password2)
+                login(request, user)
+                return redirect('/')
+        return index(request, form_valid=False, user_form=user_form)
     return redirect('/')
 
 
@@ -197,9 +194,10 @@ def profile(request, user_id):
         friends.append(friend)
 
     intr = HasInterest.objects.filter(user_id=user_id)
-
-    location = Location.objects.get(location_id=user.lives_in_location_id)
-
+    try:
+        location = Location.objects.get(location_id=user.lives_in_location_id)
+    except:
+        location = ''
     comp = WorksIn.objects.filter(user_id=user_id)
 
     uni = StudiesIn.objects.filter(user_id=user_id)
