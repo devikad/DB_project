@@ -3,13 +3,14 @@ import json
 from django.shortcuts import render, redirect, render_to_response
 from django.contrib.auth import login, authenticate, logout
 from django.template import RequestContext
-from forms import AuthenticateForm, UserCreateForm, CommentsForm, EditProfileForm, CreateGroupForm
+from forms import *
 from models import *
 from django.db import connection
 from models import *
 from datetime import datetime
 from django.db.models import Q
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import Count
 
 
 def index(request, form_valid=True, auth_form=None, user_form=None):
@@ -207,22 +208,45 @@ def search_view(request):
 def editprofile(request):
     #edit_form = edit_form or EditProfileForm()
     print "editprofile"
+    l = CanSpeak.objects.filter(user_id = request.user.user_id)
+    i = HasInterest.objects.filter(user_id = request.user.user_id)
+    u = StudiesIn.objects.filter(user_id = request.user.user_id)
+    w = WorksIn.objects.filter(user_id = request.user.user_id)
+    LFormSet = modelformset_factory(CanSpeak, form = LanguageForm, extra=1, can_delete=True)
+    IFormSet = modelformset_factory(HasInterest, form = InterestForm, extra=1, can_delete=True)
+    UFormSet = modelformset_factory(StudiesIn, form = UniForm, extra=1, can_delete=True)
+    WFormSet = modelformset_factory(WorksIn, form = WorkForm, extra=1, can_delete=True)
+    lformset = LFormSet(queryset=l)
+    iformset = IFormSet(queryset=i)
+    uformset = UFormSet(queryset=u)
+    wformset = WFormSet(queryset=w)
     if request.method == 'POST':
 	print "if"
         u = AppUser.objects.get(user_id=request.user.user_id)
+	
         form = EditProfileForm(request.POST, instance=u)
+	
+	lformset = LFormSet(request.POST)
+	iformset = IFormSet(request.POST)
+	uformset = UFormSet(request.POST)
+	wformset = WFormSet(request.POST)
         print u.username, "in view"
-        if form.is_valid():
+        if form.is_valid() and lformset.is_valid() and iformset.is_valid() and uformset.is_valid() and wformset.is_valid():
 	    print "valid"  
             u = form.save()
+	   
+	    lformset.save()
+	    iformset.save()
+	    uformset.save()
+	    wformset.save()
             return redirect('/profile/'+str(u.user_id))
 	print "not valid"
     else:
 	print "else"
         u = AppUser.objects.get(user_id=request.user.user_id)
         form = EditProfileForm(instance=u) 
-           
-    return render_to_response('edit_profile.html', { 'edit_form': form }, context_instance=RequestContext(request))
+	           
+    return render_to_response('edit_profile.html', { 'edit_form': form, 'lformset':lformset, 'iformset':iformset, 'uformset':uformset, 'wformset':wformset,  }, context_instance=RequestContext(request))
 
 def addfriend(request, user_id):
     print "in addfriend"
@@ -236,6 +260,24 @@ def addfriend(request, user_id):
     u2 = AppUser.objects.get(user_id = user_id)
     f1 = HasRelation(relation_type=relation, user_1 = u1, user_2 = u2)
     f1.save() 
+    return redirect('/profile/'+str(user_id))
+
+def removefriend(request, user_id):
+    print "in removefriend"
+    if request.user.is_authenticated():
+        thisuser = request.user
+	print thisuser.user_id, "friend"
+	print user_id, "friend"
+
+    
+    u1 = AppUser.objects.get(user_id = thisuser.user_id)
+    u2 = AppUser.objects.get(user_id = user_id)
+    
+    fr1 = HasRelation.objects.filter(user_1=u1, user_2=u2)
+    fr2 = HasRelation.objects.filter(user_1=u2, user_2=u1)
+    fr1.delete()
+    fr2.delete()
+
     return redirect('/profile/'+str(user_id))
 
 def profile(request, user_id):
@@ -300,11 +342,23 @@ def profile(request, user_id):
         fetch_g = UserGroup.objects.get(name=g[0])
         greco.append(fetch_g)
 
+    if len(greco)<1:
+	
+	gps = BelongsTo.objects.annotate(num_users=Count('user', distinct=True)).order_by('-num_users')[:1]
+	for g in gps:
+	    greco.append(g.group)
+
     frns = friend_reco(user_id)
     freco = []
     for f in frns:
         fetch_f = AppUser.objects.get(user_id=int(f[0]))
         freco.append(fetch_f)
+
+    if len(freco)<1:
+	
+	gps = HasRelation.objects.annotate(num_friends=Count('user_2', distinct=True)).order_by('-num_friends')[:1]
+	for g in gps:
+	    freco.append(g.user_1)
 
     return render(request,
                   "userProfile.html",

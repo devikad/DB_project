@@ -18,7 +18,7 @@ urlpatterns = patterns('',
 
     url(r'^editprofile$', 'myapp.views.editprofile'),
     url(r'^addfriend/(?P<user_id>\d+)/$', 'myapp.views.addfriend', name='addfriend'),
-    url(r'^removefriend/(?P<user_id>\d+)/$', 'myapp.views.removefriend', name='removefriend'),
+
     url(r'^sn_graph/(?P<user_id>\d+)/$', 'myapp.views.sn_graph_view', name='graph'),
     url(r'^create_group_view$', 'myapp.views.create_group_view'),
     url(r'^create_group_submit$', 'myapp.views.create_group_submit'),

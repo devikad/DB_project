@@ -17,8 +17,6 @@
             {% endblock %}
         </div>
     </header>
-<br>
-<br>
     <div id="content">
         <div class="wrapper">
             {% block flash %}
@@ -41,8 +39,6 @@
         </div>
     </div>
     <footer>
-<br>
-<br>
         <div class="wrapper">
             TiesAble:Enable the vision of your ties
             <a href="http://www.djangoproject.com/">
