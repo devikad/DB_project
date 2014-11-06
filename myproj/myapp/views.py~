@@ -11,6 +11,7 @@ from datetime import datetime
 from django.db.models import Q
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Count
+from django.forms.formsets import formset_factory
 
 
 def index(request, form_valid=True, auth_form=None, user_form=None):
@@ -204,6 +205,35 @@ def search_view(request):
                                'found_universities': found_universities},
                               context_instance=RequestContext(request))
 
+def addlang(request):
+    if ('lang' in request.GET) and request.GET['lang'].strip():
+        newlang = request.GET['lang']
+	u = AppUser.objects.get(user_id=request.user.user_id)
+	l = Language(name=newlang)
+	l.save()
+	c = CanSpeak(user=u, language=l)
+	c.save()
+    return redirect('/profile/'+str(u.user_id))
+
+def addint(request):
+    if ('int' in request.GET) and request.GET['int'].strip():
+        newint = request.GET['int']
+	u = AppUser.objects.get(user_id=request.user.user_id)
+	i = Interest(name=newint)
+	i.save()
+	h = HasInterest(user=u, interest=i)
+	h.save()
+    return redirect('/profile/'+str(u.user_id))
+
+def addloc(request):
+    if ('loc' in request.GET) and request.GET['loc'].strip():
+        newloc = request.GET['loc']
+	u = AppUser.objects.get(user_id=request.user.user_id)
+	l = Location(name=newloc)
+	l.save()
+	u.lives_in_location_id=l.location_id
+	u.save()
+    return redirect('/profile/'+str(u.user_id))
 
 def editprofile(request):
     #edit_form = edit_form or EditProfileForm()
@@ -226,19 +256,17 @@ def editprofile(request):
 	
         form = EditProfileForm(request.POST, instance=u)
 	
-	lformset = LFormSet(request.POST)
-	iformset = IFormSet(request.POST)
+	lformset = LFormSet(request.POST, queryset=l)
+	iformset = IFormSet(request.POST, queryset=i)
 	uformset = UFormSet(request.POST)
 	wformset = WFormSet(request.POST)
         print u.username, "in view"
-        if form.is_valid() and lformset.is_valid() and iformset.is_valid() and uformset.is_valid() and wformset.is_valid():
+        if form.is_valid() :#and iformset.is_valid() and iformset.is_valid() and uformset.is_valid() and wformset.is_valid():
 	    print "valid"  
             u = form.save()
-	   
-	    lformset.save()
-	    iformset.save()
-	    uformset.save()
-	    wformset.save()
+	    #lformset.save()
+	    #uformset.save()
+	    #wformset.save()
             return redirect('/profile/'+str(u.user_id))
 	print "not valid"
     else:

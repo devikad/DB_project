@@ -106,12 +106,12 @@ class UniForm(forms.ModelForm):
     degree = forms.ChoiceField(choices=degreech)
     class Meta:
 	model = StudiesIn
-	exclude = ['user']
+	exclude = ['user', 'location']
 
 class WorkForm(forms.ModelForm):
     class Meta:
 	model = WorksIn
-	exclude = ['user']
+	exclude = ['user', 'location']
 
 class CreateGroupForm(forms.ModelForm):
     name = forms.CharField(required=True, widget=forms.widgets.Textarea(attrs={'placeholder': 'group name'}))

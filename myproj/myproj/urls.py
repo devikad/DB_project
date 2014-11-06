@@ -11,7 +11,9 @@ urlpatterns = patterns('',
     url(r'^groups/(?P<usergroup_id>\d+)/$', 'myapp.views.usergroup_view', name='group'),  # groups
     url(r'^joingroup/(?P<usergroup_id>\d+)/$', 'myapp.views.join_group'),  # join the group
     url(r'^search_form/$', 'myapp.views.search_view'),
-
+    url(r'^addlang/$', 'myapp.views.addlang'),
+    url(r'^addint/$', 'myapp.views.addint'),
+    url(r'^addloc/$', 'myapp.views.addloc'),
     url(r'^profile/(?P<user_id>\d+)/$', 'myapp.views.profile', name='user_profile'),  # profile
     url(r'^university/(?P<uni_id>\d+)/$', 'myapp.views.university', name='university'),  # uni
     url(r'^company/(?P<comp_id>\d+)/$', 'myapp.views.company', name='company'),  # comp
