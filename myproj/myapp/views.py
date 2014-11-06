@@ -108,6 +108,13 @@ def join_group(request, usergroup_id):
     return redirect('/groups/' + str(usergroup_id))
 
 
+def leave_group(request, usergroup_id):
+    print "leaving group..."
+    group = UserGroup.objects.get(usergroup_id=usergroup_id)
+    BelongsTo.objects.get(user=request.user, group=group).delete()
+    return redirect('/groups/' + str(usergroup_id))
+
+
 def usergroup_view(request, usergroup_id, comments_form=None):
     mbrship, loggedin = False, False
     usergroup = UserGroup.objects.get(usergroup_id=usergroup_id)

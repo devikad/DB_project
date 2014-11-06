@@ -10,6 +10,7 @@ urlpatterns = patterns('',
     url(r'^submit$', 'myapp.views.submit_comments'),  # submit new comment
     url(r'^groups/(?P<usergroup_id>\d+)/$', 'myapp.views.usergroup_view', name='group'),  # groups
     url(r'^joingroup/(?P<usergroup_id>\d+)/$', 'myapp.views.join_group'),  # join the group
+    url(r'^leavegroup/(?P<usergroup_id>\d+)/$', 'myapp.views.leave_group'),  # leave the group
     url(r'^search_form/$', 'myapp.views.search_view'),
 
     url(r'^profile/(?P<user_id>\d+)/$', 'myapp.views.profile', name='user_profile'),  # profile

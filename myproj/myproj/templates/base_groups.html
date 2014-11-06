@@ -3,12 +3,21 @@
 {% block content%}
     <div>
         <h1>{{ usergroup.name }}</h1>
-        <h2>{{ usergroup.about }}</h2>
+        <p>{{ usergroup.about }}</p>
+        <h2>tags:</h2>
+        {% for topic in usergroup.istopic_set.all %}
+            <span>{{ topic.interest.name }};</span>
+        {% endfor %}
 {#        <a href="">Recent</a>#}
 {#        <a href="">Popular</a>#}
 
         {% if mbrship %}
             <div class="panel right">
+                <div>
+                    <p>
+                        <a href="{% url 'myapp.views.leave_group' usergroup.usergroup_id %}">Leave this group?</a>
+                    </p>
+                </div>
                 <h1>Post</h1>
                 <p>
                     <form action="/submit" method="post">
@@ -33,8 +42,9 @@
         <div>
             <span class="name">{{ comment.makecomment_set.get.user.username }}</span>
             <span class="time">{{ comment.makecomment_set.get.posting_time }}</span>
-            <p>said: {{ comment.text }}</p>
+            <p><b>said:</b> {{ comment.text }}</p>
         </div>
+        <br>
         {% endfor %}
 
         <h2>Group Users</h2>
