@@ -22,4 +22,4 @@ urlpatterns = patterns('',
     url(r'^sn_graph/(?P<user_id>\d+)/$', 'myapp.views.sn_graph_view', name='graph'),
     url(r'^create_group_view$', 'myapp.views.create_group_view'),
     url(r'^create_group_submit$', 'myapp.views.create_group_submit'),
-
+)

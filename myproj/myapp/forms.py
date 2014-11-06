@@ -1,15 +1,11 @@
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django import forms
 from django.utils.html import strip_tags
-<<<<<<< HEAD
 from models import Comments
 from django.db.models import Max
 from django.contrib.admin.widgets import AdminDateWidget
 from django.template import RequestContext
-=======
 from models import *
-
->>>>>>> 382a536e7a6359f192e76774bf784adaf8036c37
 
 class UserCreateForm(UserCreationForm):
     # first_name = forms.CharField(required=True, widget=forms.widgets.TextInput(attrs={'placeholder': 'First Name'}))
@@ -29,19 +25,8 @@ class UserCreateForm(UserCreationForm):
         return form
 
     def save(self, commit=True):
-<<<<<<< HEAD
-        #maxid = AppUser.objects.all().aggregate(Max('user_id'))['user_id__max']
-        #if maxid == None:
-        #    maxid = 1
-=======
->>>>>>> 382a536e7a6359f192e76774bf784adaf8036c37
         newuser = super(UserCreateForm, self).save(commit=False)
         newuser.email = self.cleaned_data['username']
-<<<<<<< HEAD
-        #newuser.user_id = maxid + 1
-        #newuser.lives_in_location = 1
-=======
->>>>>>> 382a536e7a6359f192e76774bf784adaf8036c37
         newuser.set_password(self.cleaned_data['password1'])
         if commit:
             newuser.save()
@@ -78,7 +63,7 @@ class CommentsForm(forms.ModelForm):
         model = Comments
         exclude = ['comments_id']
 
-<<<<<<< HEAD
+
 class EditProfileForm(forms.ModelForm):
     
     #first_name = forms.CharField(required=True, widget=forms.widgets.TextInput(attrs={'placeholder': 'First Name'}))
@@ -95,7 +80,7 @@ class EditProfileForm(forms.ModelForm):
     class Meta:
 	model = AppUser
 	exclude = ['username', 'last_login', 'is_superuser', 'is_staff', 'is_active', 'date_joined', 'groups', 'user_permissions', 'birthday']
-=======
+
 
 class CreateGroupForm(forms.ModelForm):
     name = forms.CharField(required=True, widget=forms.widgets.Textarea(attrs={'placeholder': 'group name'}))
@@ -111,4 +96,4 @@ class CreateGroupForm(forms.ModelForm):
     class Meta:
         model = UserGroup
         exclude = ['usergroup_id', 'admin']
->>>>>>> 382a536e7a6359f192e76774bf784adaf8036c37
+
