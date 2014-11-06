@@ -3,7 +3,7 @@ import json
 from django.shortcuts import render, redirect, render_to_response
 from django.contrib.auth import login, authenticate, logout
 from django.template import RequestContext
-from forms import AuthenticateForm, UserCreateForm, CommentsForm, EditProfileForm
+from forms import AuthenticateForm, UserCreateForm, CommentsForm, EditProfileForm, CreateGroupForm
 from models import UserGroup, AppUser, Location, AppUser1, University, Company, UniversityLocatedIn, CompanyLocatedIn, HasRelation, BelongsTo, StudiesIn, WorksIn, Interest, HasInterest, RelationType
 from django.db import connection
 from models import *
@@ -12,12 +12,10 @@ from django.db.models import Q
 from django.core.exceptions import ObjectDoesNotExist
 
 
-def index(request, auth_form=None, user_form=None):
+def index(request, form_valid=True, auth_form=None, user_form=None):
     # User is logged in
     if request.user.is_authenticated():
         user = request.user
-        # first_name = user.profile.first_name
-	#location = Location.objects.get(location_id=user.lives_in_location_id)
         return redirect('/profile/'+str(user.user_id))
     else:
         # User is not logged in
@@ -26,7 +24,9 @@ def index(request, auth_form=None, user_form=None):
 
         return render(request,
                       'login_signup.html',
-                      {'auth_form': auth_form, 'user_form': user_form, })
+                      {'form_valid': form_valid,
+                       'auth_form': auth_form,
+                       'user_form': user_form, })
 
 
 def login_view(request):
@@ -52,18 +52,18 @@ def signup(request):
     if request.method == 'POST':
         if user_form.is_valid():
             username = user_form.clean_username()
-            password = user_form.clean_password2()
-            user_form.save()
-            user = authenticate(username=username, password=password)
-            login(request, user)
-            return redirect('/')
-        else:
-            return index(request, user_form=user_form)
+            password1 = user_form.cleaned_data.get('password1')
+            password2 = user_form.cleaned_data.get('password2')
+            if password1 == password2:
+                user_form.save()
+                user = authenticate(username=username, password=password2)
+                login(request, user)
+                return redirect('/')
+        return index(request, form_valid=False, user_form=user_form)
     return redirect('/')
 
 
 def submit_comments(request):
-    print "submitting comments..."
     if request.method == "POST":
         comments_form = CommentsForm(data=request.POST)
         next_url = request.POST.get("next_url", "/")
@@ -74,14 +74,33 @@ def submit_comments(request):
                         group=UserGroup.objects.get(usergroup_id=group_id),
                         user=request.user,
                         comment=comment).save()
-            print "commentrs_form is valid!"
-            print "next_url:", next_url
             return redirect(next_url)
         else:
-            print "comments_form is not valid!"
             return redirect('/')
-    print "request type is not POST!"
     return redirect('/')
+
+
+def create_group_view(request):
+    if request.user.is_authenticated():
+        group_form = CreateGroupForm()
+        return render(request, 'creategroup.html',
+                      {
+                          'group_form': group_form
+                      })
+    return redirect('/')
+
+
+def create_group_submit(request):
+    group_form = CreateGroupForm(data=request.POST)
+    if request.method == 'POST':
+        if group_form.is_valid():
+            newgroup = group_form.save(commit=False)
+            newgroup.admin = request.user
+            newgroup.save()
+            BelongsTo(user=request.user,
+                      group=newgroup).save()
+            return redirect('/groups/' + str(newgroup.usergroup_id))
+    return redirect('/create_group_view')
 
 
 def join_group(request, usergroup_id):
@@ -113,6 +132,7 @@ def usergroup_view(request, usergroup_id, comments_form=None):
                       'next_url': '/groups/' + str(usergroup_id),
                   })
 
+
 '''
 The following function is never to be used again!
 '''
@@ -133,6 +153,7 @@ def migrate(request):
         newuser.save()
 	print "Inserted user",user
     return render(request, "migrate.html", {'msg':"success"})
+
 
 def normalize_query(query_string,
                     findterms=re.compile(r'"([^"]+)"|(\S+)').findall,
@@ -160,21 +181,28 @@ def get_query(query_string, search_fields):
 
 def search_view(request):
     query_string = ''
-    found_users, found_groups = None, None
+    found_users, found_groups, found_companies, found_universities = None, None, None, None
     if ('q' in request.GET) and request.GET['q'].strip():
         query_string = request.GET['q']
 
-        user_query = get_query(query_string, ['first_name', 'last_name', 'username'])
-        group_query = get_query(query_string, ['name', 'about'])
+        user_query = get_query(query_string, ['first_name', 'last_name'])
+        group_query = get_query(query_string, ['name'])
+        company_query = get_query(query_string, ['name'])
+        university_query = get_query(query_string, ['name'])
 
         found_users = AppUser.objects.filter(user_query)
         found_groups = UserGroup.objects.filter(group_query)
+        found_companies = Company.objects.filter(company_query)
+        found_universities = University.objects.filter(university_query)
 
     return render_to_response('search_form.html',
-                          { 'query_string': query_string,
-                            'found_users': found_users,
-                            'found_groups': found_groups},
-                          context_instance=RequestContext(request))
+                              {'query_string': query_string,
+                               'found_users': found_users,
+                               'found_groups': found_groups,
+                               'found_companies': found_companies,
+                               'found_universities': found_universities},
+                              context_instance=RequestContext(request))
+
 
 def editprofile(request):
     #edit_form = edit_form or EditProfileForm()
@@ -236,18 +264,18 @@ def profile(request, user_id):
 	    isfriend = True
 
     print myprofile, isfriend
+
     user = AppUser.objects.get(user_id=user_id)
 
     f1 = HasRelation.objects.filter(user_1_id=user_id)
     f2 = HasRelation.objects.filter(user_2_id=user_id)
     friends = []
     for f in f1:
-	friend = AppUser.objects.get(user_id=f.user_2_id)
-	friends.append(friend)
-    for f in f2:
-	friend = AppUser.objects.get(user_id=f.user_1_id)
+        friend = AppUser.objects.get(user_id=f.user_2_id)
         friends.append(friend)
-
+    for f in f2:
+        friend = AppUser.objects.get(user_id=f.user_1_id)
+        friends.append(friend)
     
     intr = HasInterest.objects.filter(user_id=user_id)
     lang = CanSpeak.objects.filter(user_id=user_id)
@@ -258,24 +286,24 @@ def profile(request, user_id):
 	location = ''
 
     comp = WorksIn.objects.filter(user_id=user_id)
-    
+
     uni = StudiesIn.objects.filter(user_id=user_id)
-     
+
     grp = BelongsTo.objects.filter(user_id=user_id)
     groups = []
     for g in grp:
-	groups.append(g.group) 
+        groups.append(g.group)
 
     grps = group_reco(user_id)
     greco = []
-    for g in grps :
-	fetch_g = UserGroup.objects.get(name=g[0])
-	greco.append(fetch_g)
+    for g in grps:
+        fetch_g = UserGroup.objects.get(name=g[0])
+        greco.append(fetch_g)
 
     frns = friend_reco(user_id)
     freco = []
-    for f in frns :
-	fetch_f = AppUser.objects.get(user_id=int(f[0]))
+    for f in frns:
+        fetch_f = AppUser.objects.get(user_id=int(f[0]))
         freco.append(fetch_f)
 
     return render(request,
@@ -287,6 +315,7 @@ def profile(request, user_id):
                       'uni': uni,
                       'location': location,
                       'groups': groups,
+
 		      'greco' : greco,
 		      'freco' : freco,
 		      'intr' : intr,
@@ -294,7 +323,9 @@ def profile(request, user_id):
 		      'myprofile' : myprofile,
 		      'isfriend' : isfriend,
 		      'lang' : lang,
+
                   })
+
 
 def friend_reco(user_id):
     cursor = connection.cursor()
@@ -308,28 +339,29 @@ from
             select i2.user_id
             from studies_in i1, studies_in i2
             where i1.university_id = i2.university_id and
-              i1.user_id = '''+str(user_id)+''' and i2.user_id <> '''+str(user_id)+'''
+              i1.user_id = ''' + str(user_id) + ''' and i2.user_id <> ''' + str(user_id) + '''
           )
           minus
           (
             select r.USER_2_ID
             from has_relation r
-            where user_1_id='''+str(user_id)+'''
+            where user_1_id=''' + str(user_id) + '''
             union
             select r2.USER_1_ID
             from has_relation r2
-            where user_2_id='''+str(user_id)+'''
+            where user_2_id=''' + str(user_id) + '''
           )
         ) same_univ
   where i.INTEREST_ID = i2.INTEREST_ID and
         same_univ.user_id = i2.USER_ID and
-        i.user_id = '''+str(user_id)+''' and i2.user_id<>'''+str(user_id)+'''
+        i.user_id = ''' + str(user_id) + ''' and i2.user_id<>''' + str(user_id) + '''
   group by i2.user_id
   order by count(i2.user_id) desc
 )
 where rownum<6;'''
     cursor.execute(sql)
     return cursor
+
 
 def group_reco(user_id):
     cursor = connection.cursor()
@@ -346,13 +378,13 @@ from user_group,
           (    
             SELECT User_2_id
             FROM has_relation
-            WHERE user_1_id = '''+str(user_id)+'''
+            WHERE user_1_id = ''' + str(user_id) + '''
           )
           UNION
           (
             SELECT User_1_id
             FROM has_relation
-            WHERE user_2_id = '''+str(user_id)+'''
+            WHERE user_2_id = ''' + str(user_id) + '''
           )
         )
         group by(group_id)
@@ -362,7 +394,7 @@ from user_group,
   (
         select group_id
         from belongs_to
-        where user_id='''+str(user_id)+'''
+        where user_id=''' + str(user_id) + '''
   )
   order by no_of_friends_in_grp desc
 ) tmp
@@ -370,17 +402,20 @@ where tmp.group_id = user_group.USERGROUP_ID;'''
     cursor.execute(sql)
     return cursor
 
+
 def university(request, uni_id):
     uni = University.objects.get(university_id=uni_id)
     location = UniversityLocatedIn.objects.filter(university=uni_id)
-    return render(request, "university.html", 
-		  { 'uni': uni, 'location': location, }) 
+    return render(request, "university.html",
+                  {'uni': uni, 'location': location, })
+
 
 def company(request, comp_id):
     comp = Company.objects.get(company_id=comp_id)
     location = CompanyLocatedIn.objects.filter(company=comp_id)
     return render(request, "company.html",
-                  { 'comp': comp, 'location': location, })
+                  {'comp': comp, 'location': location, })
+
 
 def sn_graph_view(request, user_id):
     json_dict, nodes, links = dict(), list(), list()
@@ -392,13 +427,12 @@ def sn_graph_view(request, user_id):
     for r in r2:
         nodes.append({"name": r.user_1.username})
     for target_index in xrange(1, len(nodes)):
-        links.append({"source":0, "target":target_index})
+        links.append({"source": 0, "target": target_index})
     json_dict["nodes"] = nodes
     json_dict["links"] = links
     json_data = json.dumps(json_dict)
     return render(request,
                   'sn_graph.html',
-                    {
-                        "json_data": json_data
-                    })
-
+                  {
+                      "json_data": json_data
+                  })

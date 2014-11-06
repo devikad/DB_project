@@ -28,25 +28,6 @@ class AppUser(AbstractUser):
     class Meta:
         db_table = 'app_user'
 
-class AppUser1(models.Model):
-    # first_name, last_name, email, username, password fields are inherited from AbstractUser
-    user_id = models.BigIntegerField(primary_key=True)
-    first_name = models.CharField(max_length=40, blank=True)
-    last_name = models.CharField(max_length=40, blank=True)
-    birthday = models.DateField(blank=True, null=True)
-    gender = models.CharField(max_length=1, blank=True)
-    email = models.CharField(max_length=40)
-    phone_number = models.BigIntegerField(blank=True, null=True)
-    lives_in_location = models.BigIntegerField()
-    password = models.CharField(max_length=20)
-    about_me = models.CharField(max_length=400, blank=True)
-
-    def __str__(self):
-        return '%s %s' % (self.first_name, self.last_name)
-
-    class Meta:
-        db_table = 'app_user1'
-
 
 class BelongsTo(models.Model):
     belongsto_id = models.AutoField(primary_key=True)
