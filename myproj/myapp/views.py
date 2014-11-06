@@ -4,7 +4,7 @@ from django.shortcuts import render, redirect, render_to_response
 from django.contrib.auth import login, authenticate, logout
 from django.template import RequestContext
 from forms import AuthenticateForm, UserCreateForm, CommentsForm
-from models import UserGroup, AppUser, Location, AppUser1, University, Company, UniversityLocatedIn, CompanyLocatedIn, HasRelation, BelongsTo, StudiesIn, WorksIn
+from models import UserGroup, AppUser, Location, AppUser1, University, Company, UniversityLocatedIn, CompanyLocatedIn, HasRelation, BelongsTo, StudiesIn, WorksIn, Interest, HasInterest
 from django.db import connection
 from models import *
 from datetime import datetime
@@ -179,6 +179,9 @@ def search_view(request):
 
 def profile(request, user_id):
 
+    if request.user.is_authenticated():
+        user = request.user
+
     user = AppUser.objects.get(user_id=user_id)
 
     f1 = HasRelation.objects.filter(user_1_id=user_id)
@@ -190,6 +193,8 @@ def profile(request, user_id):
     for f in f2:
 	friend = AppUser.objects.get(user_id=f.user_1_id)
         friends.append(friend)
+	
+    intr = HasInterest.objects.filter(user_id=user_id)
 
     location = Location.objects.get(location_id=user.lives_in_location)
  
@@ -201,6 +206,19 @@ def profile(request, user_id):
     groups = []
     for g in grp:
 	groups.append(g.group) 
+
+    grps = group_reco(user_id)
+    greco = []
+    for g in grps :
+	fetch_g = UserGroup.objects.get(name=g[0])
+	greco.append(fetch_g)
+
+    frns = friend_reco(user_id)
+    freco = []
+    for f in frns :
+	fetch_f = AppUser.objects.get(user_id=int(f[0]))
+        freco.append(fetch_f)
+
     return render(request,
                   "userProfile.html",
                   {
@@ -210,7 +228,84 @@ def profile(request, user_id):
                       'uni': uni,
                       'location': location,
                       'groups': groups,
+		      'greco' : greco,
+		      'freco' : freco,
+		      'intr' : intr,
                   })
+
+def friend_reco(user_id):
+    cursor = connection.cursor()
+    sql = '''select *
+from
+(
+  select i2.user_id,count(i2.user_id) as no_of_common_friends
+  from HAS_INTEREST i, HAS_INTEREST i2,
+        (
+          (
+            select i2.user_id
+            from studies_in i1, studies_in i2
+            where i1.university_id = i2.university_id and
+              i1.user_id = '''+str(user_id)+''' and i2.user_id <> '''+str(user_id)+'''
+          )
+          minus
+          (
+            select r.USER_2_ID
+            from has_relation r
+            where user_1_id='''+str(user_id)+'''
+            union
+            select r2.USER_1_ID
+            from has_relation r2
+            where user_2_id='''+str(user_id)+'''
+          )
+        ) same_univ
+  where i.INTEREST_ID = i2.INTEREST_ID and
+        same_univ.user_id = i2.USER_ID and
+        i.user_id = '''+str(user_id)+''' and i2.user_id<>'''+str(user_id)+'''
+  group by i2.user_id
+  order by count(i2.user_id) desc
+)
+where rownum<6;'''
+    cursor.execute(sql)
+    return cursor
+
+def group_reco(user_id):
+    cursor = connection.cursor()
+    sql = '''select name as Interest_name, no_of_friends_in_grp
+from user_group,
+(
+  select *
+  from
+  (
+        select group_id, count(user_id) As no_of_friends_in_grp
+        from belongs_to
+        where belongs_to.user_id in
+        (
+          (    
+            SELECT User_2_id
+            FROM has_relation
+            WHERE user_1_id = '''+str(user_id)+'''
+          )
+          UNION
+          (
+            SELECT User_1_id
+            FROM has_relation
+            WHERE user_2_id = '''+str(user_id)+'''
+          )
+        )
+        group by(group_id)
+  )
+  where group_id
+  not in
+  (
+        select group_id
+        from belongs_to
+        where user_id='''+str(user_id)+'''
+  )
+  order by no_of_friends_in_grp desc
+) tmp
+where tmp.group_id = user_group.USERGROUP_ID;'''
+    cursor.execute(sql)
+    return cursor
 
 def university(request, uni_id):
     uni = University.objects.get(university_id=uni_id)
