@@ -27,4 +27,11 @@
         </form>
     </p>
 </div>
+
+{% if not form_valid %}
+    <div class="flash error">
+        <mark>Registration error!</mark>
+    </div>
+{% endif %}
+
 {% endblock %}

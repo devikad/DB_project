@@ -9,7 +9,7 @@ from datetime import datetime
 from django.db.models import Q
 
 
-def index(request, auth_form=None, user_form=None):
+def index(request, form_valid=True, auth_form=None, user_form=None):
     # User is logged in
     if request.user.is_authenticated():
         user = request.user
@@ -24,7 +24,9 @@ def index(request, auth_form=None, user_form=None):
 
         return render(request,
                       'login_signup.html',
-                      {'auth_form': auth_form, 'user_form': user_form, })
+                      {'form_valid': form_valid,
+                       'auth_form': auth_form,
+                       'user_form': user_form, })
 
 
 def login_view(request):
@@ -56,7 +58,7 @@ def signup(request):
             login(request, user)
             return redirect('/')
         else:
-            return index(request, user_form=user_form)
+            return index(request, form_valid=False, user_form=user_form)
     return redirect('/')
 
 
