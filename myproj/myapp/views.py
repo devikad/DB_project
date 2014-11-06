@@ -4,6 +4,8 @@ from django.shortcuts import render, redirect, render_to_response
 from django.contrib.auth import login, authenticate, logout
 from django.template import RequestContext
 from forms import AuthenticateForm, UserCreateForm, CommentsForm
+from models import UserGroup, AppUser, Location, AppUser1, University, Company, UniversityLocatedIn, CompanyLocatedIn, HasRelation, BelongsTo, StudiesIn, WorksIn, Interest, HasInterest
+from django.db import connection
 from models import *
 from datetime import datetime
 from django.db.models import Q
@@ -14,9 +16,10 @@ def index(request, form_valid=True, auth_form=None, user_form=None):
     if request.user.is_authenticated():
         user = request.user
         # first_name = user.profile.first_name
+	location = Location.objects.get(location_id=user.lives_in_location)
         return render(request,
                       'userProfile.html',
-                      {'first_name': user.username})
+                      {'first_name': user.username, 'location':location.name})
     else:
         # User is not logged in
         auth_form = auth_form or AuthenticateForm()
@@ -113,6 +116,26 @@ def usergroup_view(request, usergroup_id, comments_form=None):
                       'next_url': '/groups/' + str(usergroup_id),
                   })
 
+'''
+The following function is never to be used again!
+'''
+def migrate(request):
+    a = AppUser1.objects.all()
+    #a = [allusers]
+    #a.add(allusers)
+    #print "got user", allusers.user_id
+    #a = ['aa','bb','cc','dd','ee','ff','gg','hh','ii','jj','kk','ll','mm','nn','oo','pp','qq','rr','ss']
+    for user in a:
+	checkuser = AppUser.objects.filter(username=user.email)
+	if checkuser.exists():
+	    continue
+	#em=user+'@'+user+'.com'
+	newuser = super(UserCreateForm, self).save(commit=False)
+        newuser = AppUser(username=em, email=em, lives_in_location=1, first_name=user, last_name=user)
+        newuser.set_password(user)
+        newuser.save()
+	print "Inserted user",user
+    return render(request, "migrate.html", {'msg':"success"})
 
 def normalize_query(query_string,
                     findterms=re.compile(r'"([^"]+)"|(\S+)').findall,
@@ -151,11 +174,152 @@ def search_view(request):
         found_groups = UserGroup.objects.filter(group_query)
 
     return render_to_response('search_form.html',
-                              {'query_string': query_string,
-                               'found_users': found_users,
-                               'found_groups': found_groups},
-                              context_instance=RequestContext(request))
+                          { 'query_string': query_string,
+                            'found_users': found_users,
+                            'found_groups': found_groups},
+                          context_instance=RequestContext(request))
 
+def profile(request, user_id):
+
+    if request.user.is_authenticated():
+        user = request.user
+
+    user = AppUser.objects.get(user_id=user_id)
+
+    f1 = HasRelation.objects.filter(user_1_id=user_id)
+    f2 = HasRelation.objects.filter(user_2_id=user_id)
+    friends = []
+    for f in f1:
+	friend = AppUser.objects.get(user_id=f.user_2_id)
+	friends.append(friend)
+    for f in f2:
+	friend = AppUser.objects.get(user_id=f.user_1_id)
+        friends.append(friend)
+	
+    intr = HasInterest.objects.filter(user_id=user_id)
+
+    location = Location.objects.get(location_id=user.lives_in_location)
+ 
+    comp = WorksIn.objects.filter(user_id=user_id)
+    
+    uni = StudiesIn.objects.filter(user_id=user_id)
+     
+    grp = BelongsTo.objects.filter(user_id=user_id)
+    groups = []
+    for g in grp:
+	groups.append(g.group) 
+
+    grps = group_reco(user_id)
+    greco = []
+    for g in grps :
+	fetch_g = UserGroup.objects.get(name=g[0])
+	greco.append(fetch_g)
+
+    frns = friend_reco(user_id)
+    freco = []
+    for f in frns :
+	fetch_f = AppUser.objects.get(user_id=int(f[0]))
+        freco.append(fetch_f)
+
+    return render(request,
+                  "userProfile.html",
+                  {
+                      'user': user,
+                      'friends': friends,
+                      'comp': comp,
+                      'uni': uni,
+                      'location': location,
+                      'groups': groups,
+		      'greco' : greco,
+		      'freco' : freco,
+		      'intr' : intr,
+                  })
+
+def friend_reco(user_id):
+    cursor = connection.cursor()
+    sql = '''select *
+from
+(
+  select i2.user_id,count(i2.user_id) as no_of_common_friends
+  from HAS_INTEREST i, HAS_INTEREST i2,
+        (
+          (
+            select i2.user_id
+            from studies_in i1, studies_in i2
+            where i1.university_id = i2.university_id and
+              i1.user_id = '''+str(user_id)+''' and i2.user_id <> '''+str(user_id)+'''
+          )
+          minus
+          (
+            select r.USER_2_ID
+            from has_relation r
+            where user_1_id='''+str(user_id)+'''
+            union
+            select r2.USER_1_ID
+            from has_relation r2
+            where user_2_id='''+str(user_id)+'''
+          )
+        ) same_univ
+  where i.INTEREST_ID = i2.INTEREST_ID and
+        same_univ.user_id = i2.USER_ID and
+        i.user_id = '''+str(user_id)+''' and i2.user_id<>'''+str(user_id)+'''
+  group by i2.user_id
+  order by count(i2.user_id) desc
+)
+where rownum<6;'''
+    cursor.execute(sql)
+    return cursor
+
+def group_reco(user_id):
+    cursor = connection.cursor()
+    sql = '''select name as Interest_name, no_of_friends_in_grp
+from user_group,
+(
+  select *
+  from
+  (
+        select group_id, count(user_id) As no_of_friends_in_grp
+        from belongs_to
+        where belongs_to.user_id in
+        (
+          (    
+            SELECT User_2_id
+            FROM has_relation
+            WHERE user_1_id = '''+str(user_id)+'''
+          )
+          UNION
+          (
+            SELECT User_1_id
+            FROM has_relation
+            WHERE user_2_id = '''+str(user_id)+'''
+          )
+        )
+        group by(group_id)
+  )
+  where group_id
+  not in
+  (
+        select group_id
+        from belongs_to
+        where user_id='''+str(user_id)+'''
+  )
+  order by no_of_friends_in_grp desc
+) tmp
+where tmp.group_id = user_group.USERGROUP_ID;'''
+    cursor.execute(sql)
+    return cursor
+
+def university(request, uni_id):
+    uni = University.objects.get(university_id=uni_id)
+    location = UniversityLocatedIn.objects.filter(university=uni_id)
+    return render(request, "university.html", 
+		  { 'uni': uni, 'location': location, }) 
+
+def company(request, comp_id):
+    comp = Company.objects.get(company_id=comp_id)
+    location = CompanyLocatedIn.objects.filter(company=comp_id)
+    return render(request, "company.html",
+                  { 'comp': comp, 'location': location, })
 
 def sn_graph_view(request, user_id):
     json_dict, nodes, links = dict(), list(), list()
@@ -176,3 +340,4 @@ def sn_graph_view(request, user_id):
                     {
                         "json_data": json_data
                     })
+

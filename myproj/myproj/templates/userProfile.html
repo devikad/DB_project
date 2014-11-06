@@ -3,8 +3,78 @@
 {% block content%}
     <div>
         <h1>Profile:</h1>
-        <p>
-            {{ first_name }}
-        </p>
+        <p>Name : {{ user.first_name }} {{user.last_name}}</p>
+	<p>Email : {{ user.email }}</p>
+	<p>Phone : {{ user.phone_number}}</p>
+	<p>Gender : {{ user.gender }}</p>
+	<p>Lives in : {{ location.name }}</p>
+	<p>Birthday : {{ user.birthday }}</p>
+	<p>About me : {{ user.about_me }}</p>
+	<p>Interests : {% for i in intr %} {{i.interest.name}}, {% endfor %} </p>
+	<h3>Education : </h3>
+	{% for u in uni %}
+        <div>	<p> ------ <p>
+        <p>University : <a href={% url 'university' u.university.university_id %}>{{u.university.name}}</a> </p>
+	<p>Location : {{u.location.name}}</p>
+	<p>Major : {{u.major}}</p>
+	<p>Degree : {% if u.degree == 1 %}
+{{ 'Bachelor' }}
+{% elif u.degree == 2 %}
+{{ 'Master' }}
+{% elif u.degree == 3 %}
+{{ 'PhD' }}
+{% elif u.degree == 4 %}
+{{ 'PostDoc' }}
+{% elif u.degree == 5 %}
+{{ 'Diploma' }}
+{% endif %}
+</p>
+	<p>Start date : {{u.start_date}}</p>
+	<p>End date : {{u.end_date}}</p>
+	</div>
+        {% endfor %}
+	<h3>Experience : </h3>
+	{% for c in comp %}
+         <div>   <p> ------ <p>
+        <p>Company : <a href={% url 'company' c.company.company_id %}>{{c.company.name}}</a> </p>
+        <p>Location : {{c.location.name}}</p>
+        <p>Position : {{c.position}}</p>
+        <p>Project : {{ c.project }}</p>
+	<p>Start date : {{c.start_date}}</p>
+        <p>End date : {{c.end_date}}</p>
+        </div>
+        {% endfor %}
+
     </div>
+
+    <div>
+	<h1>Friends:</h1>
+	{% for f in friends %}
+	<a href={% url 'user_profile' f.user_id %}>{{f.first_name}} {{f.last_name}}</a><br>
+	{% endfor %}
+
+    </div>
+
+    <div>
+        <h1>Groups:</h1>
+        {% for g in groups %}
+         <a href={% url 'group' g.usergroup_id %}>{{g.name}}</a><br>
+        {% endfor %}
+
+    </div>
+
+    <div>
+	<h1>Recommended Groups:</h1>
+	{% for g in greco %}
+         <a href={% url 'group' g.usergroup_id %}>{{g.name}}</a><br>
+        {% endfor %}
+    </div>
+
+    <div>
+        <h1>Recommended Friends:</h1>
+        {% for f in freco %}
+          <a href={% url 'user_profile' f.user_id %}>{{f.first_name}} {{f.last_name}}</a><br>
+        {% endfor %}
+    </div>
+
 {% endblock %}

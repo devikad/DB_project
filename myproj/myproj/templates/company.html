@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content%}
+    <div>
+        <h1>{{ comp.name }}</h1>
+	{% for l in location %}
+            <h2>{{ l.location.name }}</h2>
+        {% endfor %}
+	<p>Web Address : <a href="{{uni.web_address}}">{{comp.web_address}}</a></p>
+        <p>Established In : {{comp.established_year}} </p>
+	<p>Field : {{comp.field}} </p>
+        <p>Number of employees : {{comp.no_of_employees}}</p>
+        <p>{{comp.about}}</p> 
+ </div>
+{% endblock %}
+
+
