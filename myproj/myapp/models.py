@@ -19,7 +19,7 @@ class AppUser(AbstractUser):
     birthday = models.DateField(blank=True, null=True)
     gender = models.CharField(max_length=1, blank=True)
     phone_number = models.BigIntegerField(blank=True, null=True)
-    lives_in_location = models.BigIntegerField()
+    lives_in_location = models.ForeignKey('Location')
     about_me = models.CharField(max_length=400, blank=True)
 
     def __str__(self):

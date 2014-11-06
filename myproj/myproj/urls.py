@@ -16,6 +16,7 @@ urlpatterns = patterns('',
     url(r'^university/(?P<uni_id>\d+)/$', 'myapp.views.university', name='university'),  # uni
     url(r'^company/(?P<comp_id>\d+)/$', 'myapp.views.company', name='company'),  # comp
     url(r'^sn_graph/(?P<user_id>\d+)/$', 'myapp.views.sn_graph_view'),
-
+    url(r'^editprofile$', 'myapp.views.editprofile'),
+    url(r'^addfriend/(?P<user_id>\d+)/$', 'myapp.views.addfriend', name='addfriend'),
 )
 

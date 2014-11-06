@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block login %}
+<h1> Edit your profile : </h1>
+    <form action="/editprofile" method="post">{% csrf_token %}
+        {% for field in edit_form %}
+        {{field.label}} {{ field }} <br>
+        {% endfor %}
+        <input type="submit" value="Submit Changes">
+    </form>
+{% endblock %}
+
+{% block content %}
+{% if edit_form.non_field_errors %}
+<div class="flash error">
+    {{ edit_form.non_field_errors }}
+</div>
+{% endif %}
+
+{% endblock %}
+

@@ -223,7 +223,6 @@ def profile(request, user_id):
 	if int(thisuser.user_id) == int(user_id):
 	    myprofile = True
 	    print myprofile
-	
 	# finding all friends of currently logged in user
         f1 = HasRelation.objects.filter(user_1_id=thisuser.user_id)
         f2 = HasRelation.objects.filter(user_2_id=thisuser.user_id)
