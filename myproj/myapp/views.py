@@ -11,7 +11,7 @@ from datetime import datetime
 from django.db.models import Q
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Count
-from django.forms.formsets import formset_factory
+from django.forms.models import modelformset_factory
 
 
 def index(request, form_valid=True, auth_form=None, user_form=None):
