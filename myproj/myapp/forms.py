@@ -1,12 +1,8 @@
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django import forms
 from django.utils.html import strip_tags
-from models import Comments
-from django.db.models import Max
-from django.contrib.admin.widgets import AdminDateWidget
-from django.template import RequestContext
 from models import *
-from django.forms.models import modelformset_factory
+
 
 class UserCreateForm(UserCreationForm):
     # first_name = forms.CharField(required=True, widget=forms.widgets.TextInput(attrs={'placeholder': 'First Name'}))
@@ -66,56 +62,53 @@ class CommentsForm(forms.ModelForm):
 
 
 class EditProfileForm(forms.ModelForm):
-    
-    #first_name = forms.CharField(required=True, widget=forms.widgets.TextInput(attrs={'placeholder': 'First Name'}))
-    #last_name = forms.CharField(required=True, widget=forms.widgets.TextInput(attrs={'placeholder': 'Last Name'}))
-    #birthday = forms.DateField(widget=AdminDateWidget)
-    #gender = forms.CharField(widget=forms.widgets.TextInput(attrs={'placeholder': 'gender'}))
-    #username = forms.EmailField(widget=forms.widgets.TextInput(attrs={'placeholder': 'Email(username)'}))
-    #phone_number = forms.IntegerField(widget=forms.widgets.TextInput(attrs={'placeholder': 'Phone Number'}))
-    #password = forms.CharField(required=True, widget=forms.widgets.TextInput(attrs={'placeholder': 'Current or new password'}))
-    
-    #def save(self, commit=True):
-    #	print self.instance.username, "in forms"
-    '''
-    def save(self, commit=True):
-        user = super(UserCreateForm, self).save(commit=False)
-        user.set_password(self.cleaned_data['password'])
-        if commit:
-            user.save()
-        return user 
-    '''	
+
     class Meta:
-	model = AppUser
-	exclude = ['username', 'last_login', 'is_superuser', 'is_staff', 'is_active', 'date_joined', 'groups', 'user_permissions', 'password']
+        model = AppUser
+        exclude = ['username',
+                   'last_login',
+                   'is_superuser',
+                   'is_staff',
+                   'is_active',
+                   'date_joined',
+                   'groups',
+                   'user_permissions',
+                   'password']
+
 
 class LanguageForm(forms.ModelForm):
-    #language = forms.ModelChoiceField(queryset = Language.objects.all(), required=False)
+#language = forms.ModelChoiceField(queryset = Language.objects.all(), required=False)
     class Meta:
-	model = CanSpeak
-	exclude = ['user', 'familiarity']
+        model = CanSpeak
+        exclude = ['user', 'familiarity']
+
 
 class InterestForm(forms.ModelForm):
     #interest = forms.ModelChoiceField(queryset = Interest.objects.all(), required=False)
     class Meta:
-	model = HasInterest
-	exclude = ['user', 'degree_of_interest']
+        model = HasInterest
+        exclude = ['user', 'degree_of_interest']
+
 
 class UniForm(forms.ModelForm):
-    degreech = ((1,'Bachelor'),(2,'Master'),(1,'PhD'),(1,'PostDoc'),(1,'Diploma'))
+    degreech = ((1, 'Bachelor'), (2, 'Master'), (1, 'PhD'), (1, 'PostDoc'), (1, 'Diploma'))
     degree = forms.ChoiceField(choices=degreech)
+
     class Meta:
-	model = StudiesIn
-	exclude = ['user', 'location']
+        model = StudiesIn
+        exclude = ['user', 'location']
+
 
 class WorkForm(forms.ModelForm):
     class Meta:
-	model = WorksIn
-	exclude = ['user', 'location']
+        model = WorksIn
+        exclude = ['user', 'location']
+
 
 class CreateGroupForm(forms.ModelForm):
     name = forms.CharField(required=True, widget=forms.widgets.Textarea(attrs={'placeholder': 'group name'}))
-    about = forms.CharField(required=True, widget=forms.widgets.Textarea(attrs={'placeholder': 'this group is about...'}))
+    about = forms.CharField(required=True, widget=forms.widgets.Textarea(
+        attrs={'placeholder': 'this group is about...'}))
 
     def is_valid(self):
         form = super(CreateGroupForm, self).is_valid()
@@ -127,4 +120,3 @@ class CreateGroupForm(forms.ModelForm):
     class Meta:
         model = UserGroup
         exclude = ['usergroup_id', 'admin']
-
